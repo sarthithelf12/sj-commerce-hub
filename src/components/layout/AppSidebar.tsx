@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   IndianRupee,
+  Landmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -123,6 +124,21 @@ export const AppSidebar = () => {
         <NavItem to="/purchases" icon={<ShoppingCart size={20} />} label="Purchases" />
         <NavItem to="/expenses" icon={<Receipt size={20} />} label="Expenses" />
         <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
+
+        <div className="pt-4 pb-2">
+          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Banking</p>
+        </div>
+        <NavItem
+          to="/bank"
+          icon={<Landmark size={20} />}
+          label="Bank Management"
+          children={[
+            { to: "/bank/transactions", label: "Transactions" },
+            { to: "/bank/matching", label: "Payment Matching" },
+            { to: "/bank/guarantees", label: "Bank Guarantees" },
+            { to: "/bank/loans", label: "Loans" },
+          ]}
+        />
 
         <div className="pt-4 pb-2">
           <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">GST</p>
