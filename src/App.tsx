@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import BankManagement from "./pages/BankManagement";
 import QuotationNew from "./pages/QuotationNew";
+import PurchaseOrderNew from "./pages/PurchaseOrderNew";
 import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/bank/guarantees" element={<AppLayout><BankManagement /></AppLayout>} />
           <Route path="/bank/loans" element={<AppLayout><BankManagement /></AppLayout>} />
           <Route path="/documents/quotations/new" element={<QuotationNew />} />
+          <Route path="/documents/purchase-orders/new" element={<PurchaseOrderNew />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
