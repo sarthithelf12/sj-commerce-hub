@@ -8,7 +8,19 @@ import NotFound from "./pages/NotFound";
 import BankManagement from "./pages/BankManagement";
 import QuotationNew from "./pages/QuotationNew";
 import PurchaseOrderNew from "./pages/PurchaseOrderNew";
-import { AppLayout } from "./components/layout/AppLayout";
+import Quotations from "./pages/Quotations";
+import ProformaInvoices from "./pages/ProformaInvoices";
+import TaxInvoices from "./pages/TaxInvoices";
+import DeliveryChallans from "./pages/DeliveryChallans";
+import Sales from "./pages/Sales";
+import Purchases from "./pages/Purchases";
+import Expenses from "./pages/Expenses";
+import Inventory from "./pages/Inventory";
+import GSTManagement from "./pages/GSTManagement";
+import Reports from "./pages/Reports";
+import Parties from "./pages/Parties";
+import Transport from "./pages/Transport";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -20,15 +32,42 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/bank" element={<AppLayout><BankManagement /></AppLayout>} />
-          <Route path="/bank/transactions" element={<AppLayout><BankManagement /></AppLayout>} />
-          <Route path="/bank/matching" element={<AppLayout><BankManagement /></AppLayout>} />
-          <Route path="/bank/guarantees" element={<AppLayout><BankManagement /></AppLayout>} />
-          <Route path="/bank/loans" element={<AppLayout><BankManagement /></AppLayout>} />
+          
+          {/* Documents */}
+          <Route path="/documents/quotations" element={<Quotations />} />
           <Route path="/documents/quotations/new" element={<QuotationNew />} />
-          <Route path="/documents/purchase-orders/new" element={<PurchaseOrderNew />} />
-          <Route path="/purchases" element={<AppLayout><PurchaseOrderNew /></AppLayout>} />
+          <Route path="/documents/proforma" element={<ProformaInvoices />} />
+          <Route path="/documents/proforma/new" element={<ProformaInvoices />} />
+          <Route path="/documents/tax-invoices" element={<TaxInvoices />} />
+          <Route path="/documents/tax-invoices/new" element={<TaxInvoices />} />
+          <Route path="/documents/delivery-challans" element={<DeliveryChallans />} />
+          <Route path="/documents/delivery-challans/new" element={<DeliveryChallans />} />
+          
+          {/* Transactions */}
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/purchases" element={<Purchases />} />
           <Route path="/purchases/new" element={<PurchaseOrderNew />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/inventory" element={<Inventory />} />
+          
+          {/* Banking */}
+          <Route path="/bank" element={<BankManagement />} />
+          <Route path="/bank/transactions" element={<BankManagement />} />
+          <Route path="/bank/matching" element={<BankManagement />} />
+          <Route path="/bank/guarantees" element={<BankManagement />} />
+          <Route path="/bank/loans" element={<BankManagement />} />
+          
+          {/* GST */}
+          <Route path="/gst" element={<GSTManagement />} />
+          <Route path="/gst/delhi" element={<GSTManagement />} />
+          <Route path="/gst/maharashtra" element={<GSTManagement />} />
+          
+          {/* Other */}
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/parties" element={<Parties />} />
+          <Route path="/transport" element={<Transport />} />
+          <Route path="/settings" element={<Settings />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
