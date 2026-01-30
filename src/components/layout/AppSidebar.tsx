@@ -29,7 +29,7 @@ interface NavItemProps {
 const NavItem = ({ to, icon, label, children }: NavItemProps) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const isActive = location.pathname === to || children?.some(c => location.pathname === c.to);
+  const isActive = location.pathname === to || children?.some(c => location.pathname.startsWith(c.to));
 
   if (children) {
     return (
@@ -105,23 +105,30 @@ export const AppSidebar = () => {
         <div className="pt-4 pb-2">
           <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Documents</p>
         </div>
-        <NavItem
-          to="/documents"
-          icon={<FileText size={20} />}
-          label="Documents"
-          children={[
-            { to: "/documents/quotations", label: "Quotations" },
-            { to: "/documents/proforma", label: "Proforma Invoices" },
-            { to: "/documents/tax-invoices", label: "Tax Invoices" },
-            { to: "/documents/delivery-challans", label: "Delivery Challans" },
-          ]}
-        />
+        <NavItem to="/documents/quotations" icon={<FileText size={20} />} label="Quotations" />
 
         <div className="pt-4 pb-2">
           <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Transactions</p>
         </div>
-        <NavItem to="/sales" icon={<IndianRupee size={20} />} label="Sales" />
-        <NavItem to="/purchases" icon={<ShoppingCart size={20} />} label="Purchases" />
+        <NavItem
+          to="/sales"
+          icon={<IndianRupee size={20} />}
+          label="Sales"
+          children={[
+            { to: "/sales/tax-invoices", label: "Tax Invoices" },
+            { to: "/sales/proforma", label: "Proforma Invoices" },
+            { to: "/sales/delivery-challans", label: "Delivery Challans" },
+          ]}
+        />
+        <NavItem
+          to="/purchases"
+          icon={<ShoppingCart size={20} />}
+          label="Purchases"
+          children={[
+            { to: "/purchases", label: "All Purchase Orders" },
+            { to: "/purchases/new", label: "New Purchase Order" },
+          ]}
+        />
         <NavItem to="/expenses" icon={<Receipt size={20} />} label="Expenses" />
         <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
 

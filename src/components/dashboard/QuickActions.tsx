@@ -5,7 +5,6 @@ import {
   Receipt,
   Truck,
   ShoppingCart,
-  Package,
 } from "lucide-react";
 
 interface QuickAction {
@@ -25,32 +24,26 @@ const actions: QuickAction[] = [
   {
     icon: <FilePlus size={24} />,
     label: "Tax Invoice",
-    path: "/documents/tax-invoices/new",
+    path: "/sales/tax-invoice/new",
     color: "text-accent",
   },
   {
     icon: <Receipt size={24} />,
     label: "Proforma Invoice",
-    path: "/documents/proforma/new",
+    path: "/sales/proforma/new",
     color: "text-info",
   },
   {
     icon: <Truck size={24} />,
     label: "Delivery Challan",
-    path: "/documents/delivery-challans/new",
+    path: "/sales/delivery-challan/new",
     color: "text-warning",
   },
   {
     icon: <ShoppingCart size={24} />,
-    label: "Add Purchase",
+    label: "Purchase Order",
     path: "/purchases/new",
     color: "text-destructive",
-  },
-  {
-    icon: <Package size={24} />,
-    label: "Add Sale",
-    path: "/sales/new",
-    color: "text-success",
   },
 ];
 
@@ -58,7 +51,7 @@ export const QuickActions = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       {actions.map((action) => (
         <button
           key={action.label}
