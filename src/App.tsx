@@ -8,6 +8,9 @@ import NotFound from "./pages/NotFound";
 import BankManagement from "./pages/BankManagement";
 import QuotationNew from "./pages/QuotationNew";
 import PurchaseOrderNew from "./pages/PurchaseOrderNew";
+import TaxInvoiceNew from "./pages/TaxInvoiceNew";
+import ProformaInvoiceNew from "./pages/ProformaInvoiceNew";
+import DeliveryChallanNew from "./pages/DeliveryChallanNew";
 import Quotations from "./pages/Quotations";
 import ProformaInvoices from "./pages/ProformaInvoices";
 import TaxInvoices from "./pages/TaxInvoices";
@@ -33,20 +36,24 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           
-          {/* Documents */}
+          {/* Documents - Quotations */}
           <Route path="/documents/quotations" element={<Quotations />} />
           <Route path="/documents/quotations/new" element={<QuotationNew />} />
-          <Route path="/documents/proforma" element={<ProformaInvoices />} />
-          <Route path="/documents/proforma/new" element={<ProformaInvoices />} />
-          <Route path="/documents/tax-invoices" element={<TaxInvoices />} />
-          <Route path="/documents/tax-invoices/new" element={<TaxInvoices />} />
-          <Route path="/documents/delivery-challans" element={<DeliveryChallans />} />
-          <Route path="/documents/delivery-challans/new" element={<DeliveryChallans />} />
           
-          {/* Transactions */}
+          {/* Sales - Tax Invoices, Proforma, Delivery Challans */}
           <Route path="/sales" element={<Sales />} />
+          <Route path="/sales/tax-invoice/new" element={<TaxInvoiceNew />} />
+          <Route path="/sales/proforma/new" element={<ProformaInvoiceNew />} />
+          <Route path="/sales/delivery-challan/new" element={<DeliveryChallanNew />} />
+          <Route path="/sales/tax-invoices" element={<TaxInvoices />} />
+          <Route path="/sales/proforma" element={<ProformaInvoices />} />
+          <Route path="/sales/delivery-challans" element={<DeliveryChallans />} />
+          
+          {/* Purchases - Purchase Orders */}
           <Route path="/purchases" element={<Purchases />} />
           <Route path="/purchases/new" element={<PurchaseOrderNew />} />
+          
+          {/* Other Transactions */}
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/inventory" element={<Inventory />} />
           
