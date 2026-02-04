@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
+import { COMPANY_INFO } from "@/config/companyInfo";
 
 interface LineItem {
   id: string;
@@ -30,20 +31,7 @@ const INDIAN_STATES = [
 
 const GST_RATES = [5, 12, 18, 28];
 
-const COMPANY_INFO = {
-  name: "SJMART PRIVATE LIMITED",
-  address: "Unit 1, Plot 63, Block L Darya Ganj Delhi-110002",
-  gstin: "07ABPCS9776C1ZO",
-  pan: "ABPCS9776C",
-  phone: "9289622275",
-  email: "SJMARTPL@GMAIL.COM",
-  state: "Delhi",
-  bankName: "ICICI BANK",
-  accountName: "SJMART PRIVATE LIMITED",
-  accountNumber: "706205500002",
-  ifsc: "ICICI0007062",
-  branch: "ICICI BANK/Noida"
-};
+// COMPANY_INFO imported from config
 
 export const QuotationForm = () => {
   const [quotationNo, setQuotationNo] = useState("SJ/DL/01/0030");
