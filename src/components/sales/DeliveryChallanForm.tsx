@@ -72,6 +72,7 @@ export const DeliveryChallanForm = () => {
   
   // Remarks
   const [remarks, setRemarks] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
