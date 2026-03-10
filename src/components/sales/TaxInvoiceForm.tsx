@@ -61,6 +61,7 @@ export const TaxInvoiceForm = () => {
   
   // Terms
   const [paymentTerms, setPaymentTerms] = useState("Payment On Bill Basis in Favor of SJMART PRIVATE LIMITED");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
