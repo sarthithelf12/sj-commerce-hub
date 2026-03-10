@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Eye } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
+import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
+import { TaxInvoicePreview } from "@/components/sales/TaxInvoicePreview";
 
 interface LineItem {
   id: string;
