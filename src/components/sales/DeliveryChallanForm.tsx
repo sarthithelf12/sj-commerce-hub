@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Truck } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Truck, Eye } from "lucide-react";
 import { COMPANY_INFO } from "@/config/companyInfo";
+import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
+import { DeliveryChallanPreview } from "@/components/sales/DeliveryChallanPreview";
 
 interface LineItem {
   id: string;
@@ -70,6 +72,7 @@ export const DeliveryChallanForm = () => {
   
   // Remarks
   const [remarks, setRemarks] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
@@ -527,10 +530,42 @@ export const DeliveryChallanForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           <FileText size={16} /> Generate Delivery Challan
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={challanNo.replace(/\//g, "_")}
+        documentTitle="Delivery Challan"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <DeliveryChallanPreview
+          challanNo={challanNo}
+          date={date}
+          challanType={challanType}
+          invoiceRef={invoiceRef}
+          customerName={customerName}
+          customerAddress={customerAddress}
+          customerState={customerState}
+          customerGstin={customerGstin}
+          shippingName={shippingName}
+          shippingAddress={shippingAddress}
+          shippingState={shippingState}
+          shippingPincode={shippingPincode}
+          transporterName={transporterName}
+          vehicleNo={vehicleNo}
+          driverName={driverName}
+          driverPhone={driverPhone}
+          ewayBillNo={ewayBillNo}
+          items={items}
+          remarks={remarks}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };

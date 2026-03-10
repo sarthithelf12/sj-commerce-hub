@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, AlertCircle } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, AlertCircle, Eye } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { COMPANY_INFO } from "@/config/companyInfo";
+import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
+import { ProformaInvoicePreview } from "@/components/sales/ProformaInvoicePreview";
 
 interface LineItem {
   id: string;
@@ -54,6 +56,7 @@ export const ProformaInvoiceForm = () => {
   // Terms
   const [validity, setValidity] = useState("15 days");
   const [paymentTerms, setPaymentTerms] = useState("100% Advance Payment");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
@@ -518,10 +521,36 @@ export const ProformaInvoiceForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           <FileText size={16} /> Generate Proforma Invoice
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={proformaNo.replace(/\//g, "_")}
+        documentTitle="Proforma Invoice"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <ProformaInvoicePreview
+          proformaNo={proformaNo}
+          date={date}
+          quotationRef={quotationRef}
+          customerName={customerName}
+          customerAddress={customerAddress}
+          customerState={customerState}
+          customerGstin={customerGstin}
+          customerPincode={customerPincode}
+          items={items}
+          calculations={calculations}
+          isInterState={isInterState}
+          validity={validity}
+          paymentTerms={paymentTerms}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };

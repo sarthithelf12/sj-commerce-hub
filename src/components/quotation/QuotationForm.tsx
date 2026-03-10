@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Eye } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
+import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
+import { QuotationPreview } from "@/components/quotation/QuotationPreview";
 
 interface LineItem {
   id: string;
@@ -52,6 +54,7 @@ export const QuotationForm = () => {
   const [validity, setValidity] = useState("30 days");
   const [warranty, setWarranty] = useState("1 Year");
   const [paymentTerms, setPaymentTerms] = useState("Payment On Bill Basis in Favor of SJMART PRIVATE LIMITED");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
@@ -504,10 +507,35 @@ export const QuotationForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           <FileText size={16} /> Generate Quotation
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={quotationNo.replace(/\//g, "_")}
+        documentTitle="Quotation"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <QuotationPreview
+          quotationNo={quotationNo}
+          date={date}
+          customerName={customerName}
+          customerAddress={customerAddress}
+          customerState={customerState}
+          customerPincode={customerPincode}
+          items={items}
+          calculations={calculations}
+          isInterState={isInterState}
+          validity={validity}
+          warranty={warranty}
+          paymentTerms={paymentTerms}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };

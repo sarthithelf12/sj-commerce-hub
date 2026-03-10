@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Building2, Phone, Mail, MapPin, Truck } from "lucide-react";
+import { Plus, Trash2, Building2, Phone, Mail, MapPin, Truck, Eye } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
+import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
+import { PurchaseOrderPreview } from "@/components/purchase/PurchaseOrderPreview";
 
 interface LineItem {
   id: string;
@@ -61,6 +63,7 @@ export const PurchaseOrderForm = () => {
   const [deliveryTerms, setDeliveryTerms] = useState("To be delivered by the vendor");
   const [paymentTerms, setPaymentTerms] = useState("Payment against Delivery");
   const [remarks, setRemarks] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
@@ -558,10 +561,42 @@ export const PurchaseOrderForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           Generate Purchase Order
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={poNo.replace(/\//g, "_")}
+        documentTitle="Purchase Order"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <PurchaseOrderPreview
+          poNo={poNo}
+          date={date}
+          supplierName={supplierName}
+          supplierAddress={supplierAddress}
+          supplierState={supplierState}
+          supplierGstin={supplierGstin}
+          supplierPhone={supplierPhone}
+          supplierEmail={supplierEmail}
+          shippingAddress={shippingAddress}
+          shippingCity={shippingCity}
+          shippingState={shippingState}
+          shippingPincode={shippingPincode}
+          items={items}
+          calculations={calculations}
+          isInterState={isInterState}
+          deliveryTimeline={deliveryTimeline}
+          deliveryTerms={deliveryTerms}
+          paymentTerms={paymentTerms}
+          remarks={remarks}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };
