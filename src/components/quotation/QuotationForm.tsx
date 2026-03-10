@@ -507,10 +507,35 @@ export const QuotationForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           <FileText size={16} /> Generate Quotation
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={quotationNo.replace(/\//g, "_")}
+        documentTitle="Quotation"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <QuotationPreview
+          quotationNo={quotationNo}
+          date={date}
+          customerName={customerName}
+          customerAddress={customerAddress}
+          customerState={customerState}
+          customerPincode={customerPincode}
+          items={items}
+          calculations={calculations}
+          isInterState={isInterState}
+          validity={validity}
+          warranty={warranty}
+          paymentTerms={paymentTerms}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };

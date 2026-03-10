@@ -573,10 +573,40 @@ export const TaxInvoiceForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           <FileText size={16} /> Generate Tax Invoice
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={invoiceNo.replace(/\//g, "_")}
+        documentTitle="Tax Invoice"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <TaxInvoicePreview
+          invoiceNo={invoiceNo}
+          date={date}
+          poNumber={poNumber}
+          poDate={poDate}
+          customerName={customerName}
+          customerAddress={customerAddress}
+          customerState={customerState}
+          customerGstin={customerGstin}
+          customerPincode={customerPincode}
+          shippingName={shippingName}
+          shippingAddress={shippingAddress}
+          shippingState={shippingState}
+          shippingPincode={shippingPincode}
+          items={items}
+          calculations={calculations}
+          isInterState={isInterState}
+          paymentTerms={paymentTerms}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };

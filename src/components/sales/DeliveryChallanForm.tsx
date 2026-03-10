@@ -530,10 +530,42 @@ export const DeliveryChallanForm = () => {
         <Button type="button" variant="outline">
           Save as Draft
         </Button>
+        <Button type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+          <Eye size={16} /> Preview & Download PDF
+        </Button>
         <Button type="submit">
           <FileText size={16} /> Generate Delivery Challan
         </Button>
       </div>
+
+      <PDFDownloadWrapper
+        filename={challanNo.replace(/\//g, "_")}
+        documentTitle="Delivery Challan"
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+      >
+        <DeliveryChallanPreview
+          challanNo={challanNo}
+          date={date}
+          challanType={challanType}
+          invoiceRef={invoiceRef}
+          customerName={customerName}
+          customerAddress={customerAddress}
+          customerState={customerState}
+          customerGstin={customerGstin}
+          shippingName={shippingName}
+          shippingAddress={shippingAddress}
+          shippingState={shippingState}
+          shippingPincode={shippingPincode}
+          transporterName={transporterName}
+          vehicleNo={vehicleNo}
+          driverName={driverName}
+          driverPhone={driverPhone}
+          ewayBillNo={ewayBillNo}
+          items={items}
+          remarks={remarks}
+        />
+      </PDFDownloadWrapper>
     </form>
   );
 };
