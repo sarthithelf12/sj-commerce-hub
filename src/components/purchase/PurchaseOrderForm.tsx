@@ -63,6 +63,7 @@ export const PurchaseOrderForm = () => {
   const [deliveryTerms, setDeliveryTerms] = useState("To be delivered by the vendor");
   const [paymentTerms, setPaymentTerms] = useState("Payment against Delivery");
   const [remarks, setRemarks] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
