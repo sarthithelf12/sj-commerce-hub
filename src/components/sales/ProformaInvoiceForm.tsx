@@ -56,6 +56,7 @@ export const ProformaInvoiceForm = () => {
   // Terms
   const [validity, setValidity] = useState("15 days");
   const [paymentTerms, setPaymentTerms] = useState("100% Advance Payment");
+  const [showPreview, setShowPreview] = useState(false);
 
   const addItem = () => {
     setItems([
