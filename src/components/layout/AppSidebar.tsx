@@ -16,6 +16,7 @@ import {
   ChevronRight,
   IndianRupee,
   Landmark,
+  FilePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -101,39 +102,29 @@ export const AppSidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         <NavItem to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
-        
-        <div className="pt-4 pb-2">
-          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Documents</p>
-        </div>
-        <NavItem to="/documents/quotations" icon={<FileText size={20} />} label="Quotations" />
 
         <div className="pt-4 pb-2">
-          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Transactions</p>
+          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Sales Cycle</p>
         </div>
-        <NavItem
-          to="/sales"
-          icon={<IndianRupee size={20} />}
-          label="Sales"
-          children={[
-            { to: "/sales/tax-invoices", label: "Tax Invoices" },
-            { to: "/sales/proforma", label: "Proforma Invoices" },
-            { to: "/sales/delivery-challans", label: "Delivery Challans" },
-          ]}
-        />
-        <NavItem
-          to="/purchases"
-          icon={<ShoppingCart size={20} />}
-          label="Purchases"
-          children={[
-            { to: "/purchases", label: "All Purchase Orders" },
-            { to: "/purchases/new", label: "New Purchase Order" },
-          ]}
-        />
+        <NavItem to="/documents/quotations" icon={<FileText size={20} />} label="Quotations" />
+        <NavItem to="/sales/proforma" icon={<FilePlus size={20} />} label="Proforma Invoices" />
+        <NavItem to="/sales/tax-invoices" icon={<IndianRupee size={20} />} label="Tax Invoices" />
+        <NavItem to="/sales/delivery-challans" icon={<Truck size={20} />} label="Delivery Challans" />
+
+        <div className="pt-4 pb-2">
+          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Procurement</p>
+        </div>
+        <NavItem to="/purchases" icon={<ShoppingCart size={20} />} label="Purchase Orders" />
         <NavItem to="/expenses" icon={<Receipt size={20} />} label="Expenses" />
         <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
 
         <div className="pt-4 pb-2">
-          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Banking</p>
+          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Logistics</p>
+        </div>
+        <NavItem to="/transport" icon={<Truck size={20} />} label="Transport" />
+
+        <div className="pt-4 pb-2">
+          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Finance</p>
         </div>
         <NavItem
           to="/bank"
@@ -146,10 +137,6 @@ export const AppSidebar = () => {
             { to: "/bank/loans", label: "Loans" },
           ]}
         />
-
-        <div className="pt-4 pb-2">
-          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">GST</p>
-        </div>
         <NavItem
           to="/gst"
           icon={<FileSpreadsheet size={20} />}
@@ -161,11 +148,10 @@ export const AppSidebar = () => {
         />
 
         <div className="pt-4 pb-2">
-          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Reports</p>
+          <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Reports & Master</p>
         </div>
         <NavItem to="/reports" icon={<BarChart3 size={20} />} label="Reports" />
         <NavItem to="/parties" icon={<Users size={20} />} label="Parties" />
-        <NavItem to="/transport" icon={<Truck size={20} />} label="Transport" />
       </nav>
 
       {/* Settings */}

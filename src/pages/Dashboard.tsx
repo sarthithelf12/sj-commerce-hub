@@ -2,11 +2,12 @@ import {
   IndianRupee, 
   ShoppingCart, 
   TrendingUp, 
-  Wallet,
+  Truck,
   Calendar 
 } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { PendingActions } from "@/components/dashboard/PendingActions";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { MonthlyChart } from "@/components/dashboard/MonthlyChart";
 import { GSTSummary } from "@/components/dashboard/GSTSummary";
@@ -36,58 +37,63 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Business Flow Pipeline */}
       <section>
-        <h2 className="section-title">Quick Actions</h2>
+        <h2 className="section-title">Business Flow</h2>
         <QuickActions />
       </section>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Monthly Sales"
-          value="₹7,80,000"
-          icon={<IndianRupee size={22} />}
-          trend={{ value: "+12.5%", isPositive: true }}
-          subtitle="42 invoices"
-        />
-        <MetricCard
-          title="Monthly Purchases"
-          value="₹4,10,000"
-          icon={<ShoppingCart size={22} />}
-          trend={{ value: "-5.2%", isPositive: true }}
-          subtitle="28 orders"
-        />
-        <MetricCard
-          title="Expenses"
-          value="₹85,000"
-          icon={<Wallet size={22} />}
-          trend={{ value: "+8.1%", isPositive: false }}
-          subtitle="Transport & Labour"
-        />
-        <MetricCard
-          title="Net Profit"
-          value="₹2,85,000"
-          icon={<TrendingUp size={22} />}
-          trend={{ value: "+18.3%", isPositive: true }}
-          subtitle="This month"
-        />
-      </div>
-
-      {/* Charts and Tables */}
+      {/* Pending Actions + GST Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <MonthlyChart />
+          <PendingActions />
         </div>
         <div>
           <GSTSummary />
         </div>
       </div>
 
-      {/* Recent Transactions */}
-      <section>
-        <RecentTransactions />
-      </section>
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Total Receivables"
+          value="₹12,40,000"
+          icon={<IndianRupee size={22} />}
+          trend={{ value: "+12.5%", isPositive: true }}
+          subtitle="18 invoices outstanding"
+        />
+        <MetricCard
+          title="Total Payables"
+          value="₹6,80,000"
+          icon={<ShoppingCart size={22} />}
+          trend={{ value: "-5.2%", isPositive: true }}
+          subtitle="12 POs pending payment"
+        />
+        <MetricCard
+          title="Orders in Pipeline"
+          value="23"
+          icon={<TrendingUp size={22} />}
+          trend={{ value: "+8.1%", isPositive: true }}
+          subtitle="Across all stages"
+        />
+        <MetricCard
+          title="Deliveries This Week"
+          value="7"
+          icon={<Truck size={22} />}
+          trend={{ value: "+3", isPositive: true }}
+          subtitle="4 dispatched, 3 scheduled"
+        />
+      </div>
+
+      {/* Charts and Recent */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MonthlyChart />
+        </div>
+        <div>
+          <RecentTransactions />
+        </div>
+      </div>
     </div>
   );
 };
