@@ -1,10 +1,17 @@
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { DocumentList } from "@/components/shared/DocumentList";
+import { getDocuments, StoredDocument } from "@/utils/documentStorage";
 
 const Quotations = () => {
   const navigate = useNavigate();
+  const [docs, setDocs] = useState<StoredDocument[]>([]);
+
+  const loadDocs = () => setDocs(getDocuments("quotation"));
+  useEffect(() => { loadDocs(); }, []);
 
   return (
     <AppLayout>
@@ -19,9 +26,12 @@ const Quotations = () => {
             New Quotation
           </Button>
         </div>
-        <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
-          No quotations yet. Create your first quotation to get started.
-        </div>
+        <DocumentList
+          documents={docs}
+          type="quotation"
+          editBasePath="/documents/quotations/edit"
+          onRefresh={loadDocs}
+        />
       </div>
     </AppLayout>
   );
