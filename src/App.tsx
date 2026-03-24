@@ -39,12 +39,16 @@ const App = () => (
           {/* Documents - Quotations */}
           <Route path="/documents/quotations" element={<Quotations />} />
           <Route path="/documents/quotations/new" element={<QuotationNew />} />
+          <Route path="/documents/quotations/edit/:id" element={<QuotationNew />} />
           
           {/* Sales - Tax Invoices, Proforma, Delivery Challans */}
           <Route path="/sales" element={<Sales />} />
           <Route path="/sales/tax-invoice/new" element={<TaxInvoiceNew />} />
+          <Route path="/sales/tax-invoice/edit/:id" element={<TaxInvoiceNew />} />
           <Route path="/sales/proforma/new" element={<ProformaInvoiceNew />} />
+          <Route path="/sales/proforma/edit/:id" element={<ProformaInvoiceNew />} />
           <Route path="/sales/delivery-challan/new" element={<DeliveryChallanNew />} />
+          <Route path="/sales/delivery-challan/edit/:id" element={<DeliveryChallanNew />} />
           <Route path="/sales/tax-invoices" element={<TaxInvoices />} />
           <Route path="/sales/proforma" element={<ProformaInvoices />} />
           <Route path="/sales/delivery-challans" element={<DeliveryChallans />} />
@@ -52,6 +56,7 @@ const App = () => (
           {/* Purchases - Purchase Orders */}
           <Route path="/purchases" element={<Purchases />} />
           <Route path="/purchases/new" element={<PurchaseOrderNew />} />
+          <Route path="/purchases/edit/:id" element={<PurchaseOrderNew />} />
           
           {/* Other Transactions */}
           <Route path="/expenses" element={<Expenses />} />
