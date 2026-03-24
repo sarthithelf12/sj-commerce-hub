@@ -10,6 +10,9 @@ import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Truck, Eye } fr
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { DeliveryChallanPreview } from "@/components/sales/DeliveryChallanPreview";
+import { saveDocument } from "@/utils/documentStorage";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface LineItem {
   id: string;
@@ -40,6 +43,8 @@ const CHALLAN_TYPES = [
 // COMPANY_INFO imported from config
 
 export const DeliveryChallanForm = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [challanNo, setChallanNo] = useState("DC/SJ/DL/25/0001");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [challanType, setChallanType] = useState("");
@@ -95,7 +100,14 @@ export const DeliveryChallanForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Delivery Challan submitted", { items });
+    saveDocument("delivery-challan", challanNo, date, customerName, 0, {
+      challanNo, date, challanType, invoiceRef, customerName, customerAddress,
+      customerState, customerGstin, customerPincode, shippingName, shippingAddress,
+      shippingState, shippingPincode, transporterName, vehicleNo, driverName,
+      driverPhone, ewayBillNo, items, remarks,
+    });
+    toast({ title: "Delivery Challan saved", description: `${challanNo} has been saved successfully.` });
+    navigate("/sales/delivery-challans");
   };
 
   return (

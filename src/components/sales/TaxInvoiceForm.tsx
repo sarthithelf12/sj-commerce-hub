@@ -11,6 +11,9 @@ import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { TaxInvoicePreview } from "@/components/sales/TaxInvoicePreview";
+import { saveDocument } from "@/utils/documentStorage";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface LineItem {
   id: string;
@@ -36,6 +39,8 @@ const GST_RATES = [5, 12, 18, 28];
 // COMPANY_INFO imported from config
 
 export const TaxInvoiceForm = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [invoiceNo, setInvoiceNo] = useState("INV/SJ/DL/25/0001");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [poNumber, setPoNumber] = useState("");
@@ -124,7 +129,13 @@ export const TaxInvoiceForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Tax Invoice submitted", { items, calculations });
+    saveDocument("tax-invoice", invoiceNo, date, customerName, calculations.grandTotal, {
+      invoiceNo, date, poNumber, poDate, customerName, customerAddress, customerState,
+      customerGstin, customerPincode, shippingName, shippingAddress, shippingState,
+      shippingPincode, items, calculations, isInterState, paymentTerms,
+    });
+    toast({ title: "Tax Invoice saved", description: `${invoiceNo} has been saved successfully.` });
+    navigate("/sales/tax-invoices");
   };
 
   return (
