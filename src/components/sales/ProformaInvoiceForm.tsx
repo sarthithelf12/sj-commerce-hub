@@ -12,6 +12,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { ProformaInvoicePreview } from "@/components/sales/ProformaInvoicePreview";
+import { saveDocument } from "@/utils/documentStorage";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface LineItem {
   id: string;
@@ -37,6 +40,8 @@ const GST_RATES = [5, 12, 18, 28];
 // COMPANY_INFO imported from config
 
 export const ProformaInvoiceForm = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [proformaNo, setProformaNo] = useState("PI/SJ/DL/25/0001");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [quotationRef, setQuotationRef] = useState("");
@@ -119,7 +124,12 @@ export const ProformaInvoiceForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Proforma Invoice submitted", { items, calculations });
+    saveDocument("proforma-invoice", proformaNo, date, customerName, calculations.grandTotal, {
+      proformaNo, date, quotationRef, customerName, customerAddress, customerState,
+      customerGstin, customerPincode, items, calculations, isInterState, validity, paymentTerms,
+    });
+    toast({ title: "Proforma Invoice saved", description: `${proformaNo} has been saved successfully.` });
+    navigate("/sales/proforma");
   };
 
   return (
