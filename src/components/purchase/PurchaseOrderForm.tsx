@@ -11,6 +11,9 @@ import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { PurchaseOrderPreview } from "@/components/purchase/PurchaseOrderPreview";
+import { saveDocument } from "@/utils/documentStorage";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface LineItem {
   id: string;
@@ -36,6 +39,8 @@ const GST_RATES = [5, 12, 18, 28];
 // COMPANY_INFO imported from config
 
 export const PurchaseOrderForm = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [poNo, setPoNo] = useState("PO/SJ/DL/25/0013");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   
@@ -128,8 +133,14 @@ export const PurchaseOrderForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Purchase Order submitted", { items, calculations });
-    // TODO: Save and generate PDF
+    saveDocument("purchase-order", poNo, date, supplierName, calculations.grandTotal, {
+      poNo, date, supplierName, supplierAddress, supplierState, supplierGstin,
+      supplierPhone, supplierEmail, shippingAddress, shippingCity, shippingState,
+      shippingPincode, items, calculations, isInterState, deliveryTimeline,
+      deliveryTerms, paymentTerms, remarks,
+    });
+    toast({ title: "Purchase Order saved", description: `${poNo} has been saved successfully.` });
+    navigate("/purchases");
   };
 
   return (
