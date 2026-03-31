@@ -18,7 +18,7 @@ import {
 
 const emptyForm = {
   date: new Date().toISOString().split("T")[0], category: "other" as ExpenseCategory,
-  description: "", amount: 0, paidTo: "", paymentMode: "bank" as const, reference: "", notes: "",
+  description: "", amount: 0, paidTo: "", paymentMode: "bank" as "cash" | "bank" | "upi" | "cheque", reference: "", notes: "",
 };
 
 const Expenses = () => {

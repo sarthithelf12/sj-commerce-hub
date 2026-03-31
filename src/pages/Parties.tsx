@@ -16,7 +16,7 @@ import { getParties, saveParty, deleteParty, type Party, type PartyType } from "
 const emptyForm = {
   name: "", type: "customer" as PartyType, gstin: "", pan: "", phone: "", email: "",
   address: "", state: "", city: "", pincode: "", contactPerson: "", paymentTerms: "30 days",
-  openingBalance: 0, balanceType: "receivable" as const,
+  openingBalance: 0, balanceType: "receivable" as "receivable" | "payable",
 };
 
 const Parties = () => {
