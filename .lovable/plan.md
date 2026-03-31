@@ -1,96 +1,108 @@
 
 
-# Plan: Add Document Listing with Search, Download & Edit to All List Pages
+# Gap Analysis: SJMART ERP vs SAP-Level ERP
 
-## Overview
-All 5 document list pages (Quotations, Tax Invoices, Proforma Invoices, Delivery Challans, Purchase Orders) are currently empty placeholders. Replace them with functional listing tables showing previously created documents, with search/filter, download PDF, and edit capabilities.
+## Honest Assessment
 
-Since there is no database yet, documents will be stored in localStorage so they persist across sessions until a backend is connected.
+Your ERP has a solid document generation foundation (Quotations, POs, Invoices, Delivery Challans with PDF export and localStorage persistence). However, compared to SAP or even mid-tier ERPs like Tally/Zoho, **6 out of 10 modules are empty placeholders** and there's no backend database. Here's what needs to happen.
 
-## Changes
+## What's Working
+- Document creation flow (Quotations, POs, Tax Invoices, Proforma, DCs)
+- PDF preview and download
+- Document listing with search
+- Dashboard with business flow pipeline
+- GST-aware structure (Delhi + Mumbai)
 
-### 1. Create a Reusable Document List Component
-**New file:** `src/components/shared/DocumentList.tsx`
+## Critical Gaps & Fixes (Priority Order)
 
-A generic, reusable table component that all 5 list pages will use. Features:
-- **Search bar** at the top (filters by document number, customer/supplier name)
-- **Sortable table** with columns: S.No, Doc Number, Date, Party Name, Amount, Status
-- **Action buttons** per row: View/Download PDF, Edit, Delete
-- **Status badges**: Draft, Sent, Accepted, etc.
-- **Empty state** when no documents exist
+### Phase 1: Core Missing Modules (Highest Impact)
 
-### 2. Create a Document Storage Utility
-**New file:** `src/utils/documentStorage.ts`
+**1. Parties Master (Customer/Supplier Directory)**
+Every SAP transaction links to a master record. Currently this is a placeholder.
+- CRUD for customers and suppliers with GSTIN, address, contact, payment terms
+- Auto-suggest party names in all document forms
+- Outstanding balance per party
+- **File:** `src/pages/Parties.tsx` - Full rewrite
 
-LocalStorage-based CRUD operations:
-- `saveDocument(type, data)` - saves a quotation/invoice/PO
-- `getDocuments(type)` - retrieves all documents of a type
-- `getDocument(type, id)` - retrieves a single document
-- `deleteDocument(type, id)` - removes a document
-- Document types: `quotation`, `tax-invoice`, `proforma-invoice`, `delivery-challan`, `purchase-order`
+**2. Inventory / Stock Management**
+SAP's MM module tracks every item. Currently a placeholder.
+- Item master with HSN code, unit, default tax rate
+- Stock-in (from POs/GRN) and Stock-out (from invoices/DCs)
+- Current stock levels and low-stock alerts
+- **File:** `src/pages/Inventory.tsx` - Full rewrite
 
-### 3. Update All 5 List Pages
-Replace placeholder content with the `DocumentList` component, configured per document type.
+**3. Expenses Tracker**
+Currently a placeholder. Needed for P&L.
+- Record expenses by category (rent, salary, transport, utilities)
+- Attach receipts (image upload)
+- Monthly expense summary
+- **File:** `src/pages/Expenses.tsx` - Full rewrite
 
-**Files to update:**
-- `src/pages/Quotations.tsx`
-- `src/pages/TaxInvoices.tsx`
-- `src/pages/ProformaInvoices.tsx`
-- `src/pages/DeliveryChallans.tsx`
-- `src/pages/Purchases.tsx`
+### Phase 2: Financial Intelligence
 
-### 4. Update All 5 Form Components to Save on Submit
-When the user clicks "Generate Quotation" (or equivalent), save the document data to localStorage so it appears in the list.
+**4. Reports Module**
+SAP's strength is reporting. Currently a placeholder.
+- Sales Register (date-wise, party-wise)
+- Purchase Register
+- Outstanding Receivables/Payables aging report
+- Profit & Loss summary
+- GST-ready reports (GSTR-1, GSTR-3B data)
+- **File:** `src/pages/Reports.tsx` - Full rewrite with sub-tabs
 
-**Files to update:**
-- `src/components/quotation/QuotationForm.tsx`
-- `src/components/sales/TaxInvoiceForm.tsx`
-- `src/components/sales/ProformaInvoiceForm.tsx`
-- `src/components/sales/DeliveryChallanForm.tsx`
-- `src/components/purchase/PurchaseOrderForm.tsx`
+**5. GST Management - Functional**
+Currently just tabs with "coming soon." Should show:
+- Auto-computed Input GST (from purchases) vs Output GST (from sales)
+- Monthly ITC summary
+- GSTR-1 and GSTR-3B data tables pulled from saved invoices
+- **File:** `src/pages/GSTManagement.tsx` - Full rewrite
 
-### 5. Add Edit Routes
-Add routes for editing existing documents (reuse the same form components, pre-populated with saved data).
+**6. Transport / Logistics Tracking**
+- e-Way Bill reference tracking
+- Vehicle and transporter master
+- Delivery status tracking (dispatched, in-transit, delivered)
+- **File:** `src/pages/Transport.tsx` - Full rewrite
 
-**File:** `src/App.tsx` - add routes like `/documents/quotations/edit/:id`
+### Phase 3: Data Layer (What Makes It Real)
 
-## Document List Layout
-```text
-+----------------------------------------------------------+
-| Quotations                          [+ New Quotation]    |
-| Manage all your quotations                               |
-+----------------------------------------------------------+
-| [🔍 Search by number, customer...]   [Filter ▼] [Sort ▼]|
-+----------------------------------------------------------+
-| # | Doc No.        | Date       | Customer    | Amount   | Status | Actions     |
-|---|----------------|------------|-------------|----------|--------|-------------|
-| 1 | SJ/DL/01/0030  | 2026-03-20 | ABC Corp    | ₹45,000  | Draft  | 📄 ✏️ 🗑️  |
-| 2 | SJ/DL/01/0029  | 2026-03-18 | XYZ Ltd     | ₹1,20,000| Sent   | 📄 ✏️ 🗑️  |
-+----------------------------------------------------------+
-```
+**7. Connect Supabase Database**
+localStorage won't survive browser clears and can't support multi-user. This is the single biggest gap.
+- Migrate all document storage to Supabase tables
+- Add user authentication (login/logout)
+- Role-based access (admin, accountant, sales)
 
-## Files to Create/Edit
+**8. Document Workflow & Status Tracking**
+SAP tracks every document through a lifecycle. Currently documents are just "draft."
+- Quotation: Draft → Sent → Accepted → Converted to Invoice
+- PO: Draft → Sent → Partially Received → Fully Received
+- Invoice: Draft → Sent → Partially Paid → Paid
+- Link documents: Quotation → PO → Invoice → DC (traceability chain)
 
-| File | Action |
-|------|--------|
-| `src/components/shared/DocumentList.tsx` | New - reusable list component |
-| `src/utils/documentStorage.ts` | New - localStorage CRUD |
-| `src/pages/Quotations.tsx` | Update with document list |
-| `src/pages/TaxInvoices.tsx` | Update with document list |
-| `src/pages/ProformaInvoices.tsx` | Update with document list |
-| `src/pages/DeliveryChallans.tsx` | Update with document list |
-| `src/pages/Purchases.tsx` | Update with document list |
-| `src/components/quotation/QuotationForm.tsx` | Add save on submit |
-| `src/components/sales/TaxInvoiceForm.tsx` | Add save on submit |
-| `src/components/sales/ProformaInvoiceForm.tsx` | Add save on submit |
-| `src/components/sales/DeliveryChallanForm.tsx` | Add save on submit |
-| `src/components/purchase/PurchaseOrderForm.tsx` | Add save on submit |
-| `src/App.tsx` | Add edit routes |
+### Phase 4: Polish
 
-## Implementation Order
-1. Create `documentStorage.ts` utility
-2. Create `DocumentList.tsx` reusable component
-3. Update all 5 list pages to use `DocumentList`
-4. Update all 5 form components to save documents on submit
-5. Add edit routes to `App.tsx` and wire up form pre-population
+**9. Settings - Editable Company Info**
+Currently read-only. Allow editing company details, adding branches, customizing invoice templates.
+
+**10. Dashboard - Live Data**
+Currently all metrics are hardcoded. Wire dashboard KPIs to real document data from storage.
+
+## Recommended Next Step
+
+The highest-impact, most practical step is **Phase 1** -- building the three empty modules (Parties, Inventory, Expenses) since every other feature depends on having proper master data. Parties especially, because every document form should pull customer/supplier details from a master list instead of manual entry.
+
+## Files Summary
+
+| Priority | Module | Current State | Action |
+|----------|--------|---------------|--------|
+| P1 | Parties | Placeholder | Full build - CRUD for customers/suppliers |
+| P1 | Inventory | Placeholder | Full build - Item master + stock levels |
+| P1 | Expenses | Placeholder | Full build - Expense recording + categories |
+| P2 | Reports | Placeholder | Full build - Sales/Purchase/P&L/GST reports |
+| P2 | GST Management | Empty tabs | Compute from saved invoices |
+| P2 | Transport | Placeholder | e-Way bill + delivery tracking |
+| P3 | Database | localStorage | Supabase migration |
+| P3 | Document Workflow | Static status | Lifecycle tracking + doc linking |
+| P4 | Settings | Read-only | Editable company config |
+| P4 | Dashboard | Hardcoded | Wire to real data |
+
+Would you like me to start with Phase 1 (Parties + Inventory + Expenses modules)?
 
