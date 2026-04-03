@@ -24,6 +24,8 @@ import Reports from "./pages/Reports";
 import Parties from "./pages/Parties";
 import Transport from "./pages/Transport";
 import Settings from "./pages/Settings";
+import Enquiries from "./pages/Enquiries";
+import EnquiryNew from "./pages/EnquiryNew";
 
 const queryClient = new QueryClient();
 
