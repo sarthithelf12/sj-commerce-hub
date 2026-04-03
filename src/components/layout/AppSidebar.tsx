@@ -17,6 +17,7 @@ import {
   IndianRupee,
   Landmark,
   FilePlus,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
