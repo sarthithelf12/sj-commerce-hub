@@ -38,6 +38,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           
+          {/* Enquiries */}
+          <Route path="/enquiries" element={<Enquiries />} />
+          <Route path="/enquiries/new" element={<EnquiryNew />} />
+          <Route path="/enquiries/edit/:id" element={<EnquiryNew />} />
+          
           {/* Documents - Quotations */}
           <Route path="/documents/quotations" element={<Quotations />} />
           <Route path="/documents/quotations/new" element={<QuotationNew />} />
