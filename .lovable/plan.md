@@ -1,108 +1,48 @@
 
 
-# Gap Analysis: SJMART ERP vs SAP-Level ERP
+# Plan: Build Enquiry Module
 
-## Honest Assessment
+## Overview
+Create a complete Enquiry module as the first step in the order workflow pipeline. This adds a storage utility, a list page with stats/search/filters, a create/edit form page, and wires everything into the sidebar and router.
 
-Your ERP has a solid document generation foundation (Quotations, POs, Invoices, Delivery Challans with PDF export and localStorage persistence). However, compared to SAP or even mid-tier ERPs like Tally/Zoho, **6 out of 10 modules are empty placeholders** and there's no backend database. Here's what needs to happen.
+## Files to Create
 
-## What's Working
-- Document creation flow (Quotations, POs, Tax Invoices, Proforma, DCs)
-- PDF preview and download
-- Document listing with search
-- Dashboard with business flow pipeline
-- GST-aware structure (Delhi + Mumbai)
+### 1. `src/utils/enquiryStorage.ts`
+localStorage CRUD following `partyStorage.ts` pattern:
+- Types: `EnquiryStatus`, `EnquiryItem`, `Enquiry` (as specified)
+- Storage key: `sjmart_enquiries`
+- Functions: `getEnquiries`, `getEnquiry`, `saveEnquiry`, `deleteEnquiry`, `updateEnquiryStatus`
+- Auto-generate enquiry numbers: `ENQ/2526/001` format (FY-based, auto-incrementing)
 
-## Critical Gaps & Fixes (Priority Order)
+### 2. `src/pages/Enquiries.tsx`
+List page following the `Parties.tsx` pattern (stats cards + search + filter + table):
+- 4 stat cards: Total, Open, Won, Lost/Cancelled
+- Search bar (enquiry number, customer name) + status filter dropdown
+- Table: Enquiry No, Date, Customer, Items count, Status (color-coded Badge), Actions
+- Actions: Edit (navigate), Convert to Quotation (toast placeholder), Delete (with confirmation)
 
-### Phase 1: Core Missing Modules (Highest Impact)
+### 3. `src/pages/EnquiryNew.tsx`
+Form page for create/edit, route params for edit mode (`/enquiries/edit/:id`):
+- **Enquiry Info**: Auto-generated number (read-only), date picker (default today)
+- **Customer**: Dropdown from `getParties('customer')`, shows address/phone when selected, option to type manually
+- **Items**: Dynamic rows (product, description, quantity, unit) with add/remove, min 1 required
+- **Notes**: Optional textarea
+- **Footer**: Cancel + Save as Draft buttons
+- On edit: pre-fill from `getEnquiry(id)`
 
-**1. Parties Master (Customer/Supplier Directory)**
-Every SAP transaction links to a master record. Currently this is a placeholder.
-- CRUD for customers and suppliers with GSTIN, address, contact, payment terms
-- Auto-suggest party names in all document forms
-- Outstanding balance per party
-- **File:** `src/pages/Parties.tsx` - Full rewrite
+## Files to Edit
 
-**2. Inventory / Stock Management**
-SAP's MM module tracks every item. Currently a placeholder.
-- Item master with HSN code, unit, default tax rate
-- Stock-in (from POs/GRN) and Stock-out (from invoices/DCs)
-- Current stock levels and low-stock alerts
-- **File:** `src/pages/Inventory.tsx` - Full rewrite
+### 4. `src/components/layout/AppSidebar.tsx`
+- Import `ClipboardList` from lucide-react
+- Add "Enquiries" as first item under "Sales Cycle" section (before Quotations)
 
-**3. Expenses Tracker**
-Currently a placeholder. Needed for P&L.
-- Record expenses by category (rent, salary, transport, utilities)
-- Attach receipts (image upload)
-- Monthly expense summary
-- **File:** `src/pages/Expenses.tsx` - Full rewrite
+### 5. `src/App.tsx`
+- Import `Enquiries` and `EnquiryNew`
+- Add routes: `/enquiries`, `/enquiries/new`, `/enquiries/edit/:id`
 
-### Phase 2: Financial Intelligence
-
-**4. Reports Module**
-SAP's strength is reporting. Currently a placeholder.
-- Sales Register (date-wise, party-wise)
-- Purchase Register
-- Outstanding Receivables/Payables aging report
-- Profit & Loss summary
-- GST-ready reports (GSTR-1, GSTR-3B data)
-- **File:** `src/pages/Reports.tsx` - Full rewrite with sub-tabs
-
-**5. GST Management - Functional**
-Currently just tabs with "coming soon." Should show:
-- Auto-computed Input GST (from purchases) vs Output GST (from sales)
-- Monthly ITC summary
-- GSTR-1 and GSTR-3B data tables pulled from saved invoices
-- **File:** `src/pages/GSTManagement.tsx` - Full rewrite
-
-**6. Transport / Logistics Tracking**
-- e-Way Bill reference tracking
-- Vehicle and transporter master
-- Delivery status tracking (dispatched, in-transit, delivered)
-- **File:** `src/pages/Transport.tsx` - Full rewrite
-
-### Phase 3: Data Layer (What Makes It Real)
-
-**7. Connect Supabase Database**
-localStorage won't survive browser clears and can't support multi-user. This is the single biggest gap.
-- Migrate all document storage to Supabase tables
-- Add user authentication (login/logout)
-- Role-based access (admin, accountant, sales)
-
-**8. Document Workflow & Status Tracking**
-SAP tracks every document through a lifecycle. Currently documents are just "draft."
-- Quotation: Draft → Sent → Accepted → Converted to Invoice
-- PO: Draft → Sent → Partially Received → Fully Received
-- Invoice: Draft → Sent → Partially Paid → Paid
-- Link documents: Quotation → PO → Invoice → DC (traceability chain)
-
-### Phase 4: Polish
-
-**9. Settings - Editable Company Info**
-Currently read-only. Allow editing company details, adding branches, customizing invoice templates.
-
-**10. Dashboard - Live Data**
-Currently all metrics are hardcoded. Wire dashboard KPIs to real document data from storage.
-
-## Recommended Next Step
-
-The highest-impact, most practical step is **Phase 1** -- building the three empty modules (Parties, Inventory, Expenses) since every other feature depends on having proper master data. Parties especially, because every document form should pull customer/supplier details from a master list instead of manual entry.
-
-## Files Summary
-
-| Priority | Module | Current State | Action |
-|----------|--------|---------------|--------|
-| P1 | Parties | Placeholder | Full build - CRUD for customers/suppliers |
-| P1 | Inventory | Placeholder | Full build - Item master + stock levels |
-| P1 | Expenses | Placeholder | Full build - Expense recording + categories |
-| P2 | Reports | Placeholder | Full build - Sales/Purchase/P&L/GST reports |
-| P2 | GST Management | Empty tabs | Compute from saved invoices |
-| P2 | Transport | Placeholder | e-Way bill + delivery tracking |
-| P3 | Database | localStorage | Supabase migration |
-| P3 | Document Workflow | Static status | Lifecycle tracking + doc linking |
-| P4 | Settings | Read-only | Editable company config |
-| P4 | Dashboard | Hardcoded | Wire to real data |
-
-Would you like me to start with Phase 1 (Parties + Inventory + Expenses modules)?
+## Implementation Order
+1. Create `enquiryStorage.ts`
+2. Create `Enquiries.tsx` list page
+3. Create `EnquiryNew.tsx` form page
+4. Update `AppSidebar.tsx` and `App.tsx`
 
