@@ -24,6 +24,8 @@ import Reports from "./pages/Reports";
 import Parties from "./pages/Parties";
 import Transport from "./pages/Transport";
 import Settings from "./pages/Settings";
+import Enquiries from "./pages/Enquiries";
+import EnquiryNew from "./pages/EnquiryNew";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          
+          {/* Enquiries */}
+          <Route path="/enquiries" element={<Enquiries />} />
+          <Route path="/enquiries/new" element={<EnquiryNew />} />
+          <Route path="/enquiries/edit/:id" element={<EnquiryNew />} />
           
           {/* Documents - Quotations */}
           <Route path="/documents/quotations" element={<Quotations />} />
