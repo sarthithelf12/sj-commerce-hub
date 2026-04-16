@@ -19,9 +19,12 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getParties, type Party } from "@/utils/partyStorage";
 import { getEnquiry, saveEnquiry, type EnquiryItem } from "@/utils/enquiryStorage";
+import { ProductSelect } from "@/components/shared/ProductSelect";
+import { type Product } from "@/utils/productStorage";
 
 const emptyItem = (): EnquiryItem => ({
   id: crypto.randomUUID(),
+  productId: "",
   product: "",
   description: "",
   quantity: 1,
@@ -189,7 +192,13 @@ const EnquiryNew = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-2">
                     <Label>Product / Item Name *</Label>
-                    <Input value={item.product} onChange={e => updateItem(idx, "product", e.target.value)} placeholder="e.g. Steel Plates" />
+                    <ProductSelect
+                      value={item.productId}
+                      onValueChange={(pid) => updateItem(idx, "productId", pid)}
+                      onProductSelect={(p: Product) => {
+                        setItems(prev => prev.map((it, i) => i === idx ? { ...it, productId: p.id, product: p.name, unit: p.unit } : it));
+                      }}
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
