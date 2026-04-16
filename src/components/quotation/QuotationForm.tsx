@@ -14,9 +14,12 @@ import { QuotationPreview } from "@/components/quotation/QuotationPreview";
 import { saveDocument } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ProductSelect } from "@/components/shared/ProductSelect";
+import { type Product } from "@/utils/productStorage";
 
 interface LineItem {
   id: string;
+  productId: string;
   product: string;
   hsn: string;
   specification: string;
