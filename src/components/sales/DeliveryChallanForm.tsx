@@ -103,6 +103,20 @@ export const DeliveryChallanForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate stock availability
+    for (const item of items) {
+      if (item.productId) {
+        const available = getProductStock(item.productId);
+        if (item.quantity > available) {
+          toast({
+            title: "Insufficient stock",
+            description: `"${item.product}" has only ${available} units available, but ${item.quantity} requested.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
     saveDocument("delivery-challan", challanNo, date, customerName, 0, {
       challanNo, date, challanType, invoiceRef, customerName, customerAddress,
       customerState, customerGstin, customerPincode, shippingName, shippingAddress,
