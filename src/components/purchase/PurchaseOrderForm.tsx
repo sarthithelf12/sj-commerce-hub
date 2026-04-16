@@ -14,9 +14,12 @@ import { PurchaseOrderPreview } from "@/components/purchase/PurchaseOrderPreview
 import { saveDocument } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ProductSelect } from "@/components/shared/ProductSelect";
+import { type Product } from "@/utils/productStorage";
 
 interface LineItem {
   id: string;
+  productId: string;
   product: string;
   hsn: string;
   specification: string;
@@ -60,7 +63,7 @@ export const PurchaseOrderForm = () => {
   
   // Line items
   const [items, setItems] = useState<LineItem[]>([
-    { id: "1", product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
+    { id: "1", productId: "", product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
   ]);
   
   // Terms
@@ -73,7 +76,7 @@ export const PurchaseOrderForm = () => {
   const addItem = () => {
     setItems([
       ...items,
-      { id: Date.now().toString(), product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
+      { id: Date.now().toString(), productId: "", product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
     ]);
   };
 
