@@ -281,10 +281,12 @@ export const QuotationForm = () => {
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{index + 1}</TableCell>
                       <TableCell>
-                        <Input
-                          value={item.product}
-                          onChange={(e) => updateItem(item.id, "product", e.target.value)}
-                          placeholder="Product name"
+                        <ProductSelect
+                          value={item.productId}
+                          onValueChange={(pid) => updateItem(item.id, "productId", pid)}
+                          onProductSelect={(p: Product) => {
+                            setItems(prev => prev.map(it => it.id === item.id ? { ...it, productId: p.id, product: p.name, hsn: p.hsnCode, unitPrice: p.sellingPrice, gstRate: p.defaultTaxRate } : it));
+                          }}
                           className="h-8"
                         />
                       </TableCell>
