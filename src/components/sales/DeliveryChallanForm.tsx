@@ -75,7 +75,7 @@ export const DeliveryChallanForm = () => {
   
   // Line items
   const [items, setItems] = useState<LineItem[]>([
-    { id: "1", product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
+    { id: "1", productId: "", product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
   ]);
   
   // Remarks
@@ -85,7 +85,7 @@ export const DeliveryChallanForm = () => {
   const addItem = () => {
     setItems([
       ...items,
-      { id: Date.now().toString(), product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
+      { id: Date.now().toString(), productId: "", product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
     ]);
   };
 
