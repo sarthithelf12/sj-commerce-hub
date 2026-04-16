@@ -2,6 +2,7 @@ export type EnquiryStatus = 'open' | 'quoted' | 'won' | 'lost' | 'cancelled';
 
 export interface EnquiryItem {
   id: string;
+  productId: string;
   product: string;
   description: string;
   quantity: number;

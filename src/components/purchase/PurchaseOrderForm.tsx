@@ -14,9 +14,12 @@ import { PurchaseOrderPreview } from "@/components/purchase/PurchaseOrderPreview
 import { saveDocument } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ProductSelect } from "@/components/shared/ProductSelect";
+import { type Product } from "@/utils/productStorage";
 
 interface LineItem {
   id: string;
+  productId: string;
   product: string;
   hsn: string;
   specification: string;
@@ -60,7 +63,7 @@ export const PurchaseOrderForm = () => {
   
   // Line items
   const [items, setItems] = useState<LineItem[]>([
-    { id: "1", product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
+    { id: "1", productId: "", product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
   ]);
   
   // Terms
@@ -73,7 +76,7 @@ export const PurchaseOrderForm = () => {
   const addItem = () => {
     setItems([
       ...items,
-      { id: Date.now().toString(), product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
+      { id: Date.now().toString(), productId: "", product: "", hsn: "", specification: "", quantity: 1, unitPrice: 0, gstRate: 18 }
     ]);
   };
 
@@ -311,10 +314,12 @@ export const PurchaseOrderForm = () => {
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{index + 1}</TableCell>
                       <TableCell>
-                        <Input
-                          value={item.product}
-                          onChange={(e) => updateItem(item.id, "product", e.target.value)}
-                          placeholder="Product name"
+                        <ProductSelect
+                          value={item.productId}
+                          onValueChange={(pid) => updateItem(item.id, "productId", pid)}
+                          onProductSelect={(p: Product) => {
+                            setItems(prev => prev.map(it => it.id === item.id ? { ...it, productId: p.id, product: p.name, hsn: p.hsnCode, unitPrice: p.purchasePrice, gstRate: p.defaultTaxRate } : it));
+                          }}
                           className="h-8"
                         />
                       </TableCell>

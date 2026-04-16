@@ -13,9 +13,12 @@ import { DeliveryChallanPreview } from "@/components/sales/DeliveryChallanPrevie
 import { saveDocument } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ProductSelect } from "@/components/shared/ProductSelect";
+import { type Product, getProductStock } from "@/utils/productStorage";
 
 interface LineItem {
   id: string;
+  productId: string;
   product: string;
   hsn: string;
   specification: string;
@@ -72,7 +75,7 @@ export const DeliveryChallanForm = () => {
   
   // Line items
   const [items, setItems] = useState<LineItem[]>([
-    { id: "1", product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
+    { id: "1", productId: "", product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
   ]);
   
   // Remarks
@@ -82,7 +85,7 @@ export const DeliveryChallanForm = () => {
   const addItem = () => {
     setItems([
       ...items,
-      { id: Date.now().toString(), product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
+      { id: Date.now().toString(), productId: "", product: "", hsn: "", specification: "", quantity: 1, unit: "Nos" }
     ]);
   };
 
@@ -100,6 +103,20 @@ export const DeliveryChallanForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate stock availability
+    for (const item of items) {
+      if (item.productId) {
+        const available = getProductStock(item.productId);
+        if (item.quantity > available) {
+          toast({
+            title: "Insufficient stock",
+            description: `"${item.product}" has only ${available} units available, but ${item.quantity} requested.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
     saveDocument("delivery-challan", challanNo, date, customerName, 0, {
       challanNo, date, challanType, invoiceRef, customerName, customerAddress,
       customerState, customerGstin, customerPincode, shippingName, shippingAddress,
@@ -412,10 +429,12 @@ export const DeliveryChallanForm = () => {
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell>
-                      <Input
-                        value={item.product}
-                        onChange={(e) => updateItem(item.id, "product", e.target.value)}
-                        placeholder="Product name"
+                      <ProductSelect
+                        value={item.productId}
+                        onValueChange={(pid) => updateItem(item.id, "productId", pid)}
+                        onProductSelect={(p: Product) => {
+                          setItems(prev => prev.map(it => it.id === item.id ? { ...it, productId: p.id, product: p.name, hsn: p.hsnCode, unit: p.unit } : it));
+                        }}
                         className="h-8"
                       />
                     </TableCell>

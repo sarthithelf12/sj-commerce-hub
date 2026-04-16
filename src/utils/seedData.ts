@@ -1,0 +1,62 @@
+import { saveProduct, getProducts } from './productStorage';
+import { saveParty, getParties } from './partyStorage';
+
+const SEED_KEY = 'sjmart_data_seeded_v2';
+
+export function seedMasterData() {
+  if (localStorage.getItem(SEED_KEY)) return;
+
+  // Seed customers if empty
+  if (getParties('customer').length === 0) {
+    const customers = [
+      { name: "Controller Warehousing(Mumbai)", gstin: "-", address: "Material Organisation, Naval Store Depot, Mumbai, Maharashtra-400086", state: "Maharashtra", city: "Mumbai", pincode: "400086", contactPerson: "Chhavi Jain", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "Office of Additional Commissioner", gstin: "-", address: "Special Bureau, Santacruz West, Mumbai, Maharashtra - 400054", state: "Maharashtra", city: "Mumbai", pincode: "400054", contactPerson: "Deepak Gupta", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "Unisource Solution", gstin: "08ADNPV1110G1ZM", address: "Sant Parmanand Ji Ashram, Maharaj Babu Colony, Barmer, Rajasthan - 344001", state: "Rajasthan", city: "Barmer", pincode: "344001", contactPerson: "Gaurav Vasu", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "Unique Agency", gstin: "23ADWPA3949H1ZD", address: "Behind D Block, Dhawari Stadium, Satna Madhya Pradesh -485001", state: "Madhya Pradesh", city: "Satna", pincode: "485001", contactPerson: "Abhishek", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "Macco Enterprises", gstin: "07AAAHY5679K1ZE", address: "21, Nicholson Road, Kashmere Gate, DELHI - 110006", state: "Delhi", city: "Delhi", pincode: "110006", contactPerson: "Akshit Bhutani", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "VR Precision Casting", gstin: "03JRAPK1414C1ZJ", address: "Industrial Area, Village Randhawa, Masanda, Jalandhar, Punjab-144001", state: "Punjab", city: "Jalandhar", pincode: "144001", contactPerson: "Akshit Bhutani", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "Innovative Semiconductor Private Limited", gstin: "09AABCI0245B2Z5", address: "B 78, Sector 64, Noida, Gautam Buddha Nagar, Uttar Pradesh - 201301", state: "Uttar Pradesh", city: "Noida", pincode: "201301", contactPerson: "Akshit Bhutani", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+      { name: "Sh. Shyam Enterprises", gstin: "07DPTPS6413C1ZL", address: "G/F, 101, DSIDC Complex Bawana, SEC-1, North West Delhi, Delhi - 110039", state: "Delhi", city: "Delhi", pincode: "110039", contactPerson: "", phone: "", email: "", pan: "", type: "customer" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "receivable" as const },
+    ];
+    customers.forEach(c => saveParty(c));
+  }
+
+  // Seed suppliers if empty
+  if (getParties('supplier').length === 0) {
+    const suppliers = [
+      { name: "Signellent Technologies India Private Limited", gstin: "27AAUCS7146J1ZK", address: "Unit 1, Chaphekar Wadi, Near Sheth GH high school, Borivali East, Mumbai, Maharashtra - 400066", state: "Maharashtra", city: "Mumbai", pincode: "400066", contactPerson: "Punit Kochhar", phone: "9967730225", email: "punit@signellent.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Maharashtra Paper Company", gstin: "27AAHFM1182E1ZG", address: "592/2/11, Handewadi Road, Simply City, Bhosale Farm, Pune, Maharashtra- 411028", state: "Maharashtra", city: "Pune", pincode: "411028", contactPerson: "Kaustubh", phone: "8856921099", email: "kaustubh@envopap.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Pee Pee Batteries", gstin: "32APBPP8657G1ZQ", address: "38/1963, High School Junction, Near Metro Pillar No: 467, Edappally, Kochi-24, Kerala - 682017", state: "Kerala", city: "Kochi", pincode: "682017", contactPerson: "P P Polly", phone: "9895180114", email: "peepeepoly@yahoo.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "(S Nisha spares) MOHAMMED ASIB MUSTAFA KHAN", gstin: "27DRNPK0420H1ZW", address: "Shop No 125, Saleh Mohamed LBS Marg, Opp. Naval Park, Chirag Nagar, Ghatkopar W, Mumbai, Maharashtra- 400086", state: "Maharashtra", city: "Mumbai", pincode: "400086", contactPerson: "Asif Khan", phone: "7977382112", email: "snishaspare@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Active Chemicals", gstin: "27BGTPR0369H1ZS", address: "Plot No- 492B N.B. Godown No.2 Sector 22, Turbhe, Navi Mumbai, Maharashtra- 400705", state: "Maharashtra", city: "Navi Mumbai", pincode: "400705", contactPerson: "Devendra Rajpurohit", phone: "8850996639", email: "activchemicalsc4@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Rajshree Systems and Technology", gstin: "27AASPJ3019N1Z8", address: "9B Africa House, 1st Floor, Lamington Road, Topiwala Lane, Opp. Police Station, Mumbai, Maharashtra- 400007", state: "Maharashtra", city: "Mumbai", pincode: "400007", contactPerson: "Janish Jain", phone: "7506774649", email: "janish@rajshreesystems.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Home Decorz Store", gstin: "09AAMFH2647G1Z6", address: "Tower J FLAT NO 1203 A AMRAPALI ZODIAC, SECTOR 120 NOIDA, UP- 201301", state: "Uttar Pradesh", city: "Noida", pincode: "201301", contactPerson: "Karan Khosla", phone: "7009052784", email: "homedecorzstore@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Matchless Shopper", gstin: "07BCOPG9134Q2ZT", address: "SHOP NO. V-66 SECTOR-A BHAGWATI VIHAR, UTTAM NAGAR, NEW DELHI - 110059", state: "Delhi", city: "Delhi", pincode: "110059", contactPerson: "Akshay Gupta", phone: "9211202210", email: "matchlessshopper@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "MYSWA Ventures Private Limited", gstin: "07AALCM2722R1ZX", address: "K20A, Ground Floor, Kalkaji, New Delhi 110019", state: "Delhi", city: "Delhi", pincode: "110019", contactPerson: "Rakesh", phone: "9310093366", email: "rakesh@myswaventures.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "STAR COOL AIR CON", gstin: "07CVOPB0236J1ZO", address: "3584/4 NARANG COLONY, TRI NAGAR, North West Delhi, DELHI, 110035", state: "Delhi", city: "Delhi", pincode: "110035", contactPerson: "Pawan", phone: "9711952414", email: "", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "CREATIVE IT SOLUTION", gstin: "07AAJPG8510E1ZZ", address: "B6 &B7, SKIPPER CORNER, 88, NEHRU PLACE NEW DELHI-110019", state: "Delhi", city: "Delhi", pincode: "110019", contactPerson: "Himanshu", phone: "9582976264", email: "creativedel@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Redington Limited", gstin: "06AABCR0347P1Z7", address: "Apeejay Global Industrial & Logistic Park Ltd, Shed No.1.4, 23/5 Milestone, Delhi Mathura Road, Ballabhgarh, Haryana", state: "Haryana", city: "Ballabhgarh", pincode: "", contactPerson: "Sheetanshu Singh", phone: "9910035317", email: "sheetanshu.singh@redingtongroup.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Aermec Engineering Company", gstin: "07ABEFA2585P1ZZ", address: "K 20 B RAJAPURI, OPP. SEC 5, UTTAM NAGAR, NEW DELHI-110059", state: "Delhi", city: "Delhi", pincode: "110059", contactPerson: "Sunita", phone: "7011002022", email: "info@aermechvac.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "TELESPACE NETWORKS", gstin: "27AYOPS0990D1Z1", address: "B-35, Nandkishor Ind. Est. Off. Mahakali Road, Nr. Paper Box, Andheri (E), Mumbai, MH- 400093", state: "Maharashtra", city: "Mumbai", pincode: "400093", contactPerson: "Bhikooo", phone: "9321767024", email: "telespacenetworks@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "Zaco Computers Pvt Ltd.", gstin: "27AAACZ5409K1Z1", address: "3, DLH Park, SV Rd, Goregaon West, Mumbai, Maharashtra 400062", state: "Maharashtra", city: "Mumbai", pincode: "400062", contactPerson: "Ansh", phone: "9811183994", email: "ansh@zacocomputer.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "HUNDRE ENTERPRISES", gstin: "27AEPPH7394F1Z0", address: "Akansha Heights, Shop No.9, 4/A, Shivner Marg, MUMBAI, Maharashtra, 400018", state: "Maharashtra", city: "Mumbai", pincode: "400018", contactPerson: "Makarand Hundre", phone: "8652090578", email: "makarandhundre@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "SHREEPATI COMPUTECH PRIVATE LIMITED", gstin: "07AALCS7618A1ZD", address: "M20, HEMKUNT CHAMBERS, 89 NEHRU PLACE, South Delhi, Delhi, 110019", state: "Delhi", city: "Delhi", pincode: "110019", contactPerson: "Dilip Lunia", phone: "9711188834", email: "sales@shreepati.in", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "NEXVISION INFO LLP", gstin: "27AAWFN2003Q1ZP", address: "1 CTS NO 151-2B Global Copier Old Nagardas Road, Andheri East Mumbai-Maharashtra-400069", state: "Maharashtra", city: "Mumbai", pincode: "400069", contactPerson: "Kaushik", phone: "9769747476", email: "globalcopier11@gmail.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+      { name: "INFINITI RETAIL LIMITED", gstin: "27AACCV1726H1ZE", address: "7, Unit 701 and 702, HDIL Tower, Kaledonia, Sahar Road, Andheri East, Mumbai City, Maharashtra, 400069", state: "Maharashtra", city: "Mumbai", pincode: "400069", contactPerson: "Manish Sharma", phone: "8898001241", email: "manish.sharma@croma.com", pan: "", type: "supplier" as const, paymentTerms: "Net 30", openingBalance: 0, balanceType: "payable" as const },
+    ];
+    suppliers.forEach(s => saveParty(s));
+  }
+
+  // Seed products if empty
+  if (getProducts().length === 0) {
+    const products = [
+      { name: "Drilling Machine (Well Percussion)", hsnCode: "8459", unit: "Nos", category: "Finished Goods", defaultTaxRate: 5, purchasePrice: 2129, sellingPrice: 2594, minStockLevel: 5, description: "Well Percussion Drilling Machine" },
+      { name: "Cutter Machine (Abrasive Disk, Masonry)", hsnCode: "8567", unit: "Nos", category: "Finished Goods", defaultTaxRate: 5, purchasePrice: 2129, sellingPrice: 2594, minStockLevel: 5, description: "Abrasive Disk Masonry Cutter Machine" },
+      { name: "AC O-General 1.5T Inverter (AOGG/ASGG18CKAA-B R32)", hsnCode: "84151010", unit: "Nos", category: "Finished Goods", defaultTaxRate: 18, purchasePrice: 34746, sellingPrice: 41000, minStockLevel: 1, description: "O-General 1.5 Ton Inverter Split AC" },
+      { name: "Network Switch 24-Port Managed", hsnCode: "851762", unit: "Nos", category: "Finished Goods", defaultTaxRate: 18, purchasePrice: 12500, sellingPrice: 15000, minStockLevel: 2, description: "24-Port Managed Network Switch" },
+    ];
+    products.forEach(p => saveProduct(p));
+  }
+
+  localStorage.setItem(SEED_KEY, new Date().toISOString());
+}
