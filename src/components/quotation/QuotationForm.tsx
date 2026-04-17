@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,16 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Eye } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Eye, Info } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { QuotationPreview } from "@/components/quotation/QuotationPreview";
-import { saveDocument } from "@/utils/documentStorage";
+import { saveDocument, getDocument } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ProductSelect } from "@/components/shared/ProductSelect";
 import { type Product } from "@/utils/productStorage";
+import { getEnquiry, saveEnquiry, updateEnquiryStatus } from "@/utils/enquiryStorage";
+import { getParties } from "@/utils/partyStorage";
+import { saveLink } from "@/utils/workflowStorage";
+import { WorkflowTrail } from "@/components/shared/WorkflowTrail";
 
 interface LineItem {
   id: string;
@@ -41,7 +45,12 @@ const GST_RATES = [5, 12, 18, 28];
 
 // COMPANY_INFO imported from config
 
-export const QuotationForm = () => {
+interface QuotationFormProps {
+  existingId?: string;
+  sourceEnquiryId?: string;
+}
+
+export const QuotationForm = ({ existingId, sourceEnquiryId }: QuotationFormProps = {}) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [quotationNo, setQuotationNo] = useState("SJ/DL/01/0030");
@@ -63,6 +72,50 @@ export const QuotationForm = () => {
   const [warranty, setWarranty] = useState("1 Year");
   const [paymentTerms, setPaymentTerms] = useState("Payment On Bill Basis in Favor of SJMART PRIVATE LIMITED");
   const [showPreview, setShowPreview] = useState(false);
+  const [sourceEnquiryNo, setSourceEnquiryNo] = useState<string | null>(null);
+
+  // Pre-fill from existing quotation (edit mode)
+  useEffect(() => {
+    if (!existingId) return;
+    const doc = getDocument(existingId);
+    if (!doc) return;
+    const d = doc.data as Record<string, unknown>;
+    setQuotationNo((d.quotationNo as string) || doc.docNumber);
+    setDate((d.date as string) || doc.date);
+    setCustomerName((d.customerName as string) || "");
+    setCustomerAddress((d.customerAddress as string) || "");
+    setCustomerState((d.customerState as string) || "");
+    setCustomerPincode((d.customerPincode as string) || "");
+    if (Array.isArray(d.items) && d.items.length) setItems(d.items as LineItem[]);
+    if (d.validity) setValidity(d.validity as string);
+    if (d.warranty) setWarranty(d.warranty as string);
+    if (d.paymentTerms) setPaymentTerms(d.paymentTerms as string);
+  }, [existingId]);
+
+  // Pre-fill from source enquiry
+  useEffect(() => {
+    if (!sourceEnquiryId || existingId) return;
+    const enq = getEnquiry(sourceEnquiryId);
+    if (!enq) return;
+    setCustomerName(enq.customerName);
+    const party = getParties("customer").find(p => p.id === enq.customerId || p.name === enq.customerName);
+    if (party) {
+      setCustomerAddress(`${party.address}, ${party.city}, ${party.state} - ${party.pincode}`);
+      setCustomerState(party.state);
+      setCustomerPincode(party.pincode);
+    }
+    setItems(enq.items.map(item => ({
+      id: item.id,
+      productId: item.productId,
+      product: item.product,
+      hsn: "",
+      specification: item.description,
+      quantity: item.quantity,
+      unitPrice: 0,
+      gstRate: 18,
+    })));
+    setSourceEnquiryNo(enq.enquiryNo);
+  }, [sourceEnquiryId, existingId]);
 
   const addItem = () => {
     setItems([
@@ -127,16 +180,63 @@ export const QuotationForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveDocument("quotation", quotationNo, date, customerName, calculations.grandTotal, {
-      quotationNo, date, customerName, customerAddress, customerState, customerPincode,
-      items, calculations, isInterState, validity, warranty, paymentTerms,
-    });
-    toast({ title: "Quotation saved", description: `${quotationNo} has been saved successfully.` });
+
+    // Prevent duplicate conversion
+    if (sourceEnquiryId && !existingId) {
+      const existingEnq = getEnquiry(sourceEnquiryId);
+      if (existingEnq?.linkedQuotationId) {
+        toast({
+          title: "Already Converted",
+          description: "A quotation already exists for this enquiry.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    const saved = saveDocument(
+      "quotation", quotationNo, date, customerName, calculations.grandTotal,
+      {
+        quotationNo, date, customerName, customerAddress, customerState, customerPincode,
+        items, calculations, isInterState, validity, warranty, paymentTerms,
+      },
+      existingId,
+      sourceEnquiryId ? { enquiryId: sourceEnquiryId, workflowStatus: "sent" } : undefined,
+    );
+
+    // Wire up enquiry linkage
+    if (sourceEnquiryId && !existingId) {
+      const enq = getEnquiry(sourceEnquiryId);
+      if (enq) {
+        updateEnquiryStatus(sourceEnquiryId, "converted");
+        saveEnquiry(
+          { ...enq, linkedQuotationId: saved.id, linkedQuotationDocNumber: saved.docNumber, convertedAt: new Date().toISOString(), status: "converted" },
+          sourceEnquiryId
+        );
+        saveLink({
+          stage: "quotation",
+          documentId: saved.id,
+          documentNumber: saved.docNumber,
+          parentStage: "enquiry",
+          parentId: sourceEnquiryId,
+          parentNumber: enq.enquiryNo,
+          customerName,
+        });
+      }
+    }
+
+    toast({ title: existingId ? "Quotation updated" : "Quotation saved", description: `${quotationNo} has been saved successfully.` });
     navigate("/documents/quotations");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {sourceEnquiryNo && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+          <Info size={14} />
+          Pre-filled from Enquiry <strong>{sourceEnquiryNo}</strong>. Review and set prices before saving.
+        </div>
+      )}
       {/* Header with Quotation Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* From - Company Details */}
