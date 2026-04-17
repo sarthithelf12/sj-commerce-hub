@@ -625,9 +625,20 @@ export const QuotationForm = ({ existingId, sourceEnquiryId }: QuotationFormProp
           <Eye size={16} /> Preview & Download PDF
         </Button>
         <Button type="submit">
-          <FileText size={16} /> Generate Quotation
+          <FileText size={16} /> {existingId ? "Update Quotation" : "Generate Quotation"}
         </Button>
       </div>
+
+      {existingId && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Transaction Trail</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WorkflowTrail documentId={existingId} currentStage="quotation" />
+          </CardContent>
+        </Card>
+      )}
 
       <PDFDownloadWrapper
         filename={quotationNo.replace(/\//g, "_")}
