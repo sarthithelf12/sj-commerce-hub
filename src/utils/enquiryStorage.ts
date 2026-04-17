@@ -1,4 +1,4 @@
-export type EnquiryStatus = 'open' | 'quoted' | 'won' | 'lost' | 'cancelled';
+export type EnquiryStatus = 'open' | 'quoted' | 'converted' | 'won' | 'lost' | 'cancelled';
 
 export interface EnquiryItem {
   id: string;
@@ -20,6 +20,8 @@ export interface Enquiry {
   status: EnquiryStatus;
   closureReason: string;
   linkedQuotationId: string;
+  linkedQuotationDocNumber?: string;
+  convertedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
