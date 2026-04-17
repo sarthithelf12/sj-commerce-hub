@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Eye, Pencil, Trash2, FileDown } from "lucide-react";
+import { Search, Pencil, Trash2 } from "lucide-react";
 import { StoredDocument, deleteDocument, DocumentType } from "@/utils/documentStorage";
 import { formatCurrency } from "@/utils/numberToWords";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +23,8 @@ interface DocumentListProps {
   type: DocumentType;
   editBasePath: string;
   onRefresh: () => void;
+  /** Optional extra row actions rendered before Edit/Delete. */
+  extraActions?: (doc: StoredDocument) => React.ReactNode;
 }
 
 const statusStyles: Record<string, string> = {
@@ -32,7 +34,31 @@ const statusStyles: Record<string, string> = {
   rejected: "bg-destructive/10 text-destructive",
 };
 
-export const DocumentList = ({ documents, type, editBasePath, onRefresh }: DocumentListProps) => {
+const workflowStatusStyles: Record<string, string> = {
+  converted: "bg-purple-50 text-purple-700",
+  "po-received": "bg-blue-50 text-blue-700",
+  ordered: "bg-yellow-50 text-yellow-700",
+  delivered: "bg-green-50 text-green-700",
+  invoiced: "bg-emerald-50 text-emerald-700",
+  raised: "bg-orange-50 text-orange-700",
+  paid: "bg-emerald-50 text-emerald-700",
+  partial: "bg-amber-50 text-amber-700",
+  cancelled: "bg-gray-50 text-gray-700",
+};
+
+const workflowStatusLabels: Record<string, string> = {
+  converted: "Converted",
+  "po-received": "PO Received",
+  ordered: "Ordered",
+  delivered: "Delivered",
+  invoiced: "Invoiced",
+  raised: "Raised",
+  paid: "Paid",
+  partial: "Partial",
+  cancelled: "Cancelled",
+};
+
+export const DocumentList = ({ documents, type, editBasePath, onRefresh, extraActions }: DocumentListProps) => {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -99,12 +125,20 @@ export const DocumentList = ({ documents, type, editBasePath, onRefresh }: Docum
                   {formatCurrency(doc.amount)}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={statusStyles[doc.status] || ""}>
-                    {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
-                  </Badge>
+                  <div className="flex flex-col gap-1 items-start">
+                    <Badge variant="outline" className={statusStyles[doc.status] || ""}>
+                      {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                    </Badge>
+                    {doc.workflowStatus && doc.workflowStatus !== doc.status && (
+                      <Badge variant="outline" className={workflowStatusStyles[doc.workflowStatus] || ""}>
+                        {workflowStatusLabels[doc.workflowStatus] || doc.workflowStatus}
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex justify-end gap-1">
+                  <div className="flex justify-end items-center gap-1 flex-wrap">
+                    {extraActions?.(doc)}
                     <Button
                       variant="ghost"
                       size="icon"

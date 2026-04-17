@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DocumentList } from "@/components/shared/DocumentList";
 import { getDocuments, StoredDocument } from "@/utils/documentStorage";
@@ -31,6 +31,20 @@ const Purchases = () => {
           type="purchase-order"
           editBasePath="/purchases/edit"
           onRefresh={loadDocs}
+          extraActions={(doc) =>
+            doc.workflowStatus !== "delivered" && doc.workflowStatus !== "invoiced" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1"
+                title="Generate Delivery Challan"
+                onClick={() => navigate(`/sales/delivery-challan/new/from-supplier-po/${doc.id}`)}
+              >
+                <Truck size={12} />
+                Generate DC
+              </Button>
+            )
+          }
         />
       </div>
     </AppLayout>

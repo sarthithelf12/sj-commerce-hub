@@ -26,6 +26,10 @@ import Transport from "./pages/Transport";
 import Settings from "./pages/Settings";
 import Enquiries from "./pages/Enquiries";
 import EnquiryNew from "./pages/EnquiryNew";
+import ClientPOs from "./pages/ClientPOs";
+import ClientPONew from "./pages/ClientPONew";
+import Payments from "./pages/Payments";
+import PaymentNew from "./pages/PaymentNew";
 
 const queryClient = new QueryClient();
 
@@ -37,56 +41,72 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          
+
           {/* Enquiries */}
           <Route path="/enquiries" element={<Enquiries />} />
           <Route path="/enquiries/new" element={<EnquiryNew />} />
           <Route path="/enquiries/edit/:id" element={<EnquiryNew />} />
-          
+
           {/* Documents - Quotations */}
           <Route path="/documents/quotations" element={<Quotations />} />
           <Route path="/documents/quotations/new" element={<QuotationNew />} />
+          <Route path="/documents/quotations/new/from-enquiry/:enquiryId" element={<QuotationNew />} />
           <Route path="/documents/quotations/edit/:id" element={<QuotationNew />} />
-          
+
+          {/* Client POs */}
+          <Route path="/client-po" element={<ClientPOs />} />
+          <Route path="/client-po/new" element={<ClientPONew />} />
+          <Route path="/client-po/new/from-quotation/:quotationId" element={<ClientPONew />} />
+          <Route path="/client-po/edit/:id" element={<ClientPONew />} />
+
           {/* Sales - Tax Invoices, Proforma, Delivery Challans */}
           <Route path="/sales" element={<Sales />} />
           <Route path="/sales/tax-invoice/new" element={<TaxInvoiceNew />} />
+          <Route path="/sales/tax-invoice/new/from-delivery/:deliveryId" element={<TaxInvoiceNew />} />
           <Route path="/sales/tax-invoice/edit/:id" element={<TaxInvoiceNew />} />
           <Route path="/sales/proforma/new" element={<ProformaInvoiceNew />} />
           <Route path="/sales/proforma/edit/:id" element={<ProformaInvoiceNew />} />
           <Route path="/sales/delivery-challan/new" element={<DeliveryChallanNew />} />
+          <Route path="/sales/delivery-challan/new/from-supplier-po/:supplierPoId" element={<DeliveryChallanNew />} />
           <Route path="/sales/delivery-challan/edit/:id" element={<DeliveryChallanNew />} />
           <Route path="/sales/tax-invoices" element={<TaxInvoices />} />
           <Route path="/sales/proforma" element={<ProformaInvoices />} />
           <Route path="/sales/delivery-challans" element={<DeliveryChallans />} />
-          
+
           {/* Purchases - Purchase Orders */}
           <Route path="/purchases" element={<Purchases />} />
           <Route path="/purchases/new" element={<PurchaseOrderNew />} />
+          <Route path="/purchases/new/from-client-po/:clientPoId" element={<PurchaseOrderNew />} />
           <Route path="/purchases/edit/:id" element={<PurchaseOrderNew />} />
-          
+
+          {/* Payments */}
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/payments/new" element={<PaymentNew />} />
+          <Route path="/payments/new/from-invoice/:invoiceId" element={<PaymentNew />} />
+          <Route path="/payments/edit/:id" element={<PaymentNew />} />
+
           {/* Other Transactions */}
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/inventory" element={<Inventory />} />
-          
+
           {/* Banking */}
           <Route path="/bank" element={<BankManagement />} />
           <Route path="/bank/transactions" element={<BankManagement />} />
           <Route path="/bank/matching" element={<BankManagement />} />
           <Route path="/bank/guarantees" element={<BankManagement />} />
           <Route path="/bank/loans" element={<BankManagement />} />
-          
+
           {/* GST */}
           <Route path="/gst" element={<GSTManagement />} />
           <Route path="/gst/delhi" element={<GSTManagement />} />
           <Route path="/gst/maharashtra" element={<GSTManagement />} />
-          
+
           {/* Other */}
           <Route path="/reports" element={<Reports />} />
           <Route path="/parties" element={<Parties />} />
           <Route path="/transport" element={<Transport />} />
           <Route path="/settings" element={<Settings />} />
-          
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

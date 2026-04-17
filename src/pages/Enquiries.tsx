@@ -15,13 +15,14 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Search, Pencil, Trash2, FileText, ClipboardList } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ArrowRight, ExternalLink, ClipboardList } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getEnquiries, deleteEnquiry, type Enquiry, type EnquiryStatus } from "@/utils/enquiryStorage";
 
 const statusConfig: Record<EnquiryStatus, { label: string; className: string }> = {
   open: { label: "Open", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" },
   quoted: { label: "Quoted", className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" },
+  converted: { label: "Converted", className: "bg-purple-100 text-purple-800 hover:bg-purple-100" },
   won: { label: "Won", className: "bg-green-100 text-green-800 hover:bg-green-100" },
   lost: { label: "Lost", className: "bg-red-100 text-red-800 hover:bg-red-100" },
   cancelled: { label: "Cancelled", className: "bg-gray-100 text-gray-600 hover:bg-gray-100" },
@@ -60,8 +61,13 @@ const Enquiries = () => {
     }
   };
 
-  const handleConvert = (e: Enquiry) => {
-    toast({ title: "Coming soon", description: "Convert to Quotation will be available in the next update." });
+  const handleConvert = (enq: Enquiry) => {
+    if (enq.status === "converted" || enq.linkedQuotationId) {
+      toast({ title: "Already converted", description: enq.linkedQuotationDocNumber ? `Linked to ${enq.linkedQuotationDocNumber}` : "Opening linked quotation" });
+      if (enq.linkedQuotationId) navigate(`/documents/quotations/edit/${enq.linkedQuotationId}`);
+      return;
+    }
+    navigate(`/documents/quotations/new/from-enquiry/${enq.id}`);
   };
 
   return (
@@ -160,9 +166,13 @@ const Enquiries = () => {
                         <Button variant="ghost" size="sm" onClick={() => navigate(`/enquiries/edit/${enq.id}`)}>
                           <Pencil size={14} />
                         </Button>
-                        {(enq.status === "open" || enq.status === "quoted") && (
-                          <Button variant="ghost" size="sm" onClick={() => handleConvert(enq)}>
-                            <FileText size={14} />
+                        {enq.status === "converted" ? (
+                          <Button variant="ghost" size="sm" title="View Quotation" onClick={() => handleConvert(enq)}>
+                            <ExternalLink size={14} />
+                          </Button>
+                        ) : (enq.status === "open" || enq.status === "quoted") && (
+                          <Button variant="ghost" size="sm" title="Convert to Quotation" onClick={() => handleConvert(enq)}>
+                            <ArrowRight size={14} />
                           </Button>
                         )}
                         <Button variant="ghost" size="sm" onClick={() => setDeleteId(enq.id)}>

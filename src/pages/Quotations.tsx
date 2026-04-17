@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ClipboardCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DocumentList } from "@/components/shared/DocumentList";
 import { getDocuments, StoredDocument } from "@/utils/documentStorage";
@@ -31,6 +31,18 @@ const Quotations = () => {
           type="quotation"
           editBasePath="/documents/quotations/edit"
           onRefresh={loadDocs}
+          extraActions={(doc) => (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1"
+              title="Mark as Client PO Received"
+              onClick={() => navigate(`/client-po/new/from-quotation/${doc.id}`)}
+            >
+              <ClipboardCheck size={12} />
+              Client PO
+            </Button>
+          )}
         />
       </div>
     </AppLayout>
