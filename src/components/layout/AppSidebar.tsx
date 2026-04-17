@@ -18,6 +18,8 @@ import {
   Landmark,
   FilePlus,
   ClipboardList,
+  ClipboardCheck,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -109,9 +111,11 @@ export const AppSidebar = () => {
         </div>
         <NavItem to="/enquiries" icon={<ClipboardList size={20} />} label="Enquiries" />
         <NavItem to="/documents/quotations" icon={<FileText size={20} />} label="Quotations" />
+        <NavItem to="/client-po" icon={<ClipboardCheck size={20} />} label="Client POs" />
         <NavItem to="/sales/proforma" icon={<FilePlus size={20} />} label="Proforma Invoices" />
         <NavItem to="/sales/tax-invoices" icon={<IndianRupee size={20} />} label="Tax Invoices" />
         <NavItem to="/sales/delivery-challans" icon={<Truck size={20} />} label="Delivery Challans" />
+        <NavItem to="/payments" icon={<CreditCard size={20} />} label="Payments" />
 
         <div className="pt-4 pb-2">
           <p className="px-3 text-xs font-semibold text-sidebar-muted uppercase tracking-wider">Procurement</p>

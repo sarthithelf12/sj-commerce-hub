@@ -1,5 +1,18 @@
 export type DocumentType = 'quotation' | 'tax-invoice' | 'proforma-invoice' | 'delivery-challan' | 'purchase-order';
 
+export type WorkflowStatus =
+  | 'open'
+  | 'converted'
+  | 'sent'
+  | 'po-received'
+  | 'ordered'
+  | 'delivered'
+  | 'partial'
+  | 'invoiced'
+  | 'raised'
+  | 'paid'
+  | 'cancelled';
+
 export interface StoredDocument {
   id: string;
   type: DocumentType;
@@ -11,6 +24,16 @@ export interface StoredDocument {
   data: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+
+  // Workflow linkage (optional, backward compatible)
+  enquiryId?: string;
+  quotationId?: string;
+  clientPoRef?: string;
+  clientPoId?: string;
+  supplierPoId?: string;
+  deliveryId?: string;
+  invoiceId?: string;
+  workflowStatus?: WorkflowStatus;
 }
 
 const STORAGE_KEY = 'erp_documents';
@@ -35,7 +58,11 @@ export function saveDocument(
   partyName: string,
   amount: number,
   data: Record<string, unknown>,
-  existingId?: string
+  existingId?: string,
+  extra?: Partial<Pick<StoredDocument,
+    'enquiryId' | 'quotationId' | 'clientPoRef' | 'clientPoId' |
+    'supplierPoId' | 'deliveryId' | 'invoiceId' | 'workflowStatus'
+  >>
 ): StoredDocument {
   const docs = getAllDocuments();
   const now = new Date().toISOString();
@@ -51,6 +78,7 @@ export function saveDocument(
         amount,
         data,
         updatedAt: now,
+        ...(extra || {}),
       };
       setAllDocuments(docs);
       return docs[index];
@@ -68,10 +96,21 @@ export function saveDocument(
     data,
     createdAt: now,
     updatedAt: now,
+    ...(extra || {}),
   };
   docs.unshift(doc);
   setAllDocuments(docs);
   return doc;
+}
+
+export function updateDocumentWorkflowStatus(id: string, workflowStatus: WorkflowStatus): void {
+  const docs = getAllDocuments();
+  const idx = docs.findIndex(d => d.id === id);
+  if (idx !== -1) {
+    docs[idx].workflowStatus = workflowStatus;
+    docs[idx].updatedAt = new Date().toISOString();
+    setAllDocuments(docs);
+  }
 }
 
 export function getDocuments(type: DocumentType): StoredDocument[] {

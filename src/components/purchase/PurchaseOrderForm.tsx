@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,16 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Building2, Phone, Mail, MapPin, Truck, Eye } from "lucide-react";
+import { Plus, Trash2, Building2, Phone, Mail, MapPin, Truck, Eye, Info } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { PurchaseOrderPreview } from "@/components/purchase/PurchaseOrderPreview";
-import { saveDocument } from "@/utils/documentStorage";
+import { saveDocument, getDocument } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ProductSelect } from "@/components/shared/ProductSelect";
 import { type Product } from "@/utils/productStorage";
+import { getClientPO, attachSupplierPoToClientPo } from "@/utils/clientPoStorage";
+import { saveLink } from "@/utils/workflowStorage";
+import { WorkflowTrail } from "@/components/shared/WorkflowTrail";
 
 interface LineItem {
   id: string;
@@ -41,7 +44,12 @@ const GST_RATES = [5, 12, 18, 28];
 
 // COMPANY_INFO imported from config
 
-export const PurchaseOrderForm = () => {
+interface PurchaseOrderFormProps {
+  existingId?: string;
+  sourceClientPoId?: string;
+}
+
+export const PurchaseOrderForm = ({ existingId, sourceClientPoId }: PurchaseOrderFormProps = {}) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [poNo, setPoNo] = useState("PO/SJ/DL/25/0013");
@@ -72,6 +80,54 @@ export const PurchaseOrderForm = () => {
   const [paymentTerms, setPaymentTerms] = useState("Payment against Delivery");
   const [remarks, setRemarks] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [clientPoRef, setClientPoRef] = useState("");
+  const [sourceBanner, setSourceBanner] = useState<string | null>(null);
+
+  // Pre-fill from existing PO (edit mode)
+  useEffect(() => {
+    if (!existingId) return;
+    const doc = getDocument(existingId);
+    if (!doc) return;
+    const d = doc.data as Record<string, unknown>;
+    setPoNo((d.poNo as string) || doc.docNumber);
+    setDate((d.date as string) || doc.date);
+    setSupplierName((d.supplierName as string) || "");
+    setSupplierAddress((d.supplierAddress as string) || "");
+    setSupplierState((d.supplierState as string) || "");
+    setSupplierGstin((d.supplierGstin as string) || "");
+    setSupplierPhone((d.supplierPhone as string) || "");
+    setSupplierEmail((d.supplierEmail as string) || "");
+    setShippingAddress((d.shippingAddress as string) || "");
+    setShippingCity((d.shippingCity as string) || "");
+    setShippingState((d.shippingState as string) || "");
+    setShippingPincode((d.shippingPincode as string) || "");
+    if (Array.isArray(d.items) && d.items.length) setItems(d.items as LineItem[]);
+    if (d.deliveryTimeline) setDeliveryTimeline(d.deliveryTimeline as string);
+    if (d.deliveryTerms) setDeliveryTerms(d.deliveryTerms as string);
+    if (d.paymentTerms) setPaymentTerms(d.paymentTerms as string);
+    if (d.remarks) setRemarks(d.remarks as string);
+    if (doc.clientPoRef) setClientPoRef(doc.clientPoRef);
+  }, [existingId]);
+
+  // Pre-fill from source Client PO
+  useEffect(() => {
+    if (!sourceClientPoId || existingId) return;
+    const cpo = getClientPO(sourceClientPoId);
+    if (!cpo) return;
+    setClientPoRef(cpo.clientPoNumber);
+    setItems(cpo.items.map(it => ({
+      id: it.id,
+      productId: it.productId,
+      product: it.product,
+      hsn: it.hsn,
+      specification: "",
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      gstRate: it.gstRate,
+    })));
+    setRemarks(`Against Client PO: ${cpo.clientPoNumber} (${cpo.internalRef})`);
+    setSourceBanner(`Pre-filled from Client PO ${cpo.clientPoNumber} / ${cpo.internalRef}. Add supplier details and review pricing.`);
+  }, [sourceClientPoId, existingId]);
 
   const addItem = () => {
     setItems([

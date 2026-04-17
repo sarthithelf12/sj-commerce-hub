@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Receipt } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DocumentList } from "@/components/shared/DocumentList";
 import { getDocuments, StoredDocument } from "@/utils/documentStorage";
@@ -31,6 +31,20 @@ const DeliveryChallans = () => {
           type="delivery-challan"
           editBasePath="/sales/delivery-challan/edit"
           onRefresh={loadDocs}
+          extraActions={(doc) =>
+            doc.workflowStatus !== "invoiced" && doc.workflowStatus !== "paid" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1"
+                title="Generate Tax Invoice"
+                onClick={() => navigate(`/sales/tax-invoice/new/from-delivery/${doc.id}`)}
+              >
+                <Receipt size={12} />
+                Generate Invoice
+              </Button>
+            )
+          }
         />
       </div>
     </AppLayout>
