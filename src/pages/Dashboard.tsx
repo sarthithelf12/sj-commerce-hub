@@ -11,6 +11,7 @@ import { PendingActions } from "@/components/dashboard/PendingActions";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { MonthlyChart } from "@/components/dashboard/MonthlyChart";
 import { GSTSummary } from "@/components/dashboard/GSTSummary";
+import { WorkflowPipeline } from "@/components/dashboard/WorkflowPipeline";
 
 const Dashboard = () => {
   const currentDate = new Date().toLocaleDateString("en-IN", {
@@ -36,6 +37,9 @@ const Dashboard = () => {
           <span className="text-sm font-medium">Offline Mode</span>
         </div>
       </div>
+
+      {/* Workflow Pipeline */}
+      <WorkflowPipeline />
 
       {/* Business Flow Pipeline */}
       <section>

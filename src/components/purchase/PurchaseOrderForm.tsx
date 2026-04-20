@@ -223,6 +223,12 @@ export const PurchaseOrderForm = ({ existingId, sourceClientPoId }: PurchaseOrde
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {sourceBanner && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+          <Info size={14} />
+          {sourceBanner}
+        </div>
+      )}
       {/* Header Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Invoice To - Company Details */}
