@@ -41,7 +41,12 @@ const GST_RATES = [5, 12, 18, 28];
 
 // COMPANY_INFO imported from config
 
-export const TaxInvoiceForm = () => {
+interface TaxInvoiceFormProps {
+  existingId?: string;
+  sourceDeliveryId?: string;
+}
+
+export const TaxInvoiceForm = ({ existingId, sourceDeliveryId }: TaxInvoiceFormProps = {}) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [invoiceNo, setInvoiceNo] = useState("INV/SJ/DL/25/0001");
