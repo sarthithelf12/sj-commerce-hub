@@ -45,7 +45,12 @@ const CHALLAN_TYPES = [
 
 // COMPANY_INFO imported from config
 
-export const DeliveryChallanForm = () => {
+interface DeliveryChallanFormProps {
+  existingId?: string;
+  sourceSupplierPoId?: string;
+}
+
+export const DeliveryChallanForm = ({ existingId, sourceSupplierPoId }: DeliveryChallanFormProps = {}) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [challanNo, setChallanNo] = useState("DC/SJ/DL/25/0001");
