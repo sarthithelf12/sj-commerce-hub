@@ -656,9 +656,20 @@ export const PurchaseOrderForm = ({ existingId, sourceClientPoId }: PurchaseOrde
           <Eye size={16} /> Preview & Download PDF
         </Button>
         <Button type="submit">
-          Generate Purchase Order
+          {existingId ? "Update Purchase Order" : "Generate Purchase Order"}
         </Button>
       </div>
+
+      {existingId && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Transaction Trail</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WorkflowTrail documentId={existingId} currentStage="supplier-po" />
+          </CardContent>
+        </Card>
+      )}
 
       <PDFDownloadWrapper
         filename={poNo.replace(/\//g, "_")}
