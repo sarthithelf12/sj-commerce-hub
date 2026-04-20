@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,15 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Truck, Eye } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Truck, Eye, Info } from "lucide-react";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { DeliveryChallanPreview } from "@/components/sales/DeliveryChallanPreview";
-import { saveDocument } from "@/utils/documentStorage";
+import { saveDocument, getDocument, updateDocumentWorkflowStatus } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ProductSelect } from "@/components/shared/ProductSelect";
 import { type Product, getProductStock } from "@/utils/productStorage";
+import { saveLink } from "@/utils/workflowStorage";
+import { WorkflowTrail } from "@/components/shared/WorkflowTrail";
 
 interface LineItem {
   id: string;
@@ -86,6 +88,69 @@ export const DeliveryChallanForm = ({ existingId, sourceSupplierPoId }: Delivery
   // Remarks
   const [remarks, setRemarks] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [sourceBanner, setSourceBanner] = useState<string | null>(null);
+  const [supplierPoMaxQty, setSupplierPoMaxQty] = useState<Record<string, number>>({});
+
+  // Pre-fill from existing DC (edit mode)
+  useEffect(() => {
+    if (!existingId) return;
+    const doc = getDocument(existingId);
+    if (!doc) return;
+    const d = doc.data as Record<string, unknown>;
+    setChallanNo((d.challanNo as string) || doc.docNumber);
+    setDate((d.date as string) || doc.date);
+    setChallanType((d.challanType as string) || "");
+    setInvoiceRef((d.invoiceRef as string) || "");
+    setCustomerName((d.customerName as string) || "");
+    setCustomerAddress((d.customerAddress as string) || "");
+    setCustomerState((d.customerState as string) || "");
+    setCustomerGstin((d.customerGstin as string) || "");
+    setCustomerPincode((d.customerPincode as string) || "");
+    setShippingName((d.shippingName as string) || "");
+    setShippingAddress((d.shippingAddress as string) || "");
+    setShippingState((d.shippingState as string) || "");
+    setShippingPincode((d.shippingPincode as string) || "");
+    setTransporterName((d.transporterName as string) || "");
+    setVehicleNo((d.vehicleNo as string) || "");
+    setDriverName((d.driverName as string) || "");
+    setDriverPhone((d.driverPhone as string) || "");
+    setEwayBillNo((d.ewayBillNo as string) || "");
+    if (Array.isArray(d.items) && d.items.length) setItems(d.items as LineItem[]);
+    setRemarks((d.remarks as string) || "");
+  }, [existingId]);
+
+  // Pre-fill from source Supplier PO
+  useEffect(() => {
+    if (!sourceSupplierPoId || existingId) return;
+    const po = getDocument(sourceSupplierPoId);
+    if (!po) return;
+    const d = po.data as Record<string, unknown>;
+    setCustomerName((d.supplierName as string) || po.partyName);
+    setCustomerAddress((d.supplierAddress as string) || "");
+    setCustomerState((d.supplierState as string) || "");
+    setCustomerGstin((d.supplierGstin as string) || "");
+    setInvoiceRef(po.docNumber);
+    const poItems = (Array.isArray(d.items) ? d.items : []) as Array<Record<string, unknown>>;
+    const maxQtyMap: Record<string, number> = {};
+    setItems(
+      poItems.map((it, idx) => {
+        const productId = (it.productId as string) || "";
+        const qty = Number(it.quantity) || 1;
+        if (productId) maxQtyMap[productId] = qty;
+        return {
+          id: String(it.id || idx + 1),
+          productId,
+          product: (it.product as string) || "",
+          hsn: (it.hsn as string) || "",
+          specification: (it.specification as string) || "",
+          quantity: qty,
+          unit: (it.unit as string) || "Nos",
+        };
+      })
+    );
+    setSupplierPoMaxQty(maxQtyMap);
+    setSourceBanner(`Pre-filled from Supplier PO ${po.docNumber}. Quantities cannot exceed PO quantities.`);
+  }, [sourceSupplierPoId, existingId]);
 
   const addItem = () => {
     setItems([
@@ -108,6 +173,20 @@ export const DeliveryChallanForm = ({ existingId, sourceSupplierPoId }: Delivery
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate against supplier PO quantity (if linked)
+    if (sourceSupplierPoId) {
+      for (const item of items) {
+        const max = item.productId ? supplierPoMaxQty[item.productId] : undefined;
+        if (max !== undefined && item.quantity > max) {
+          toast({
+            title: "Quantity Error",
+            description: `Cannot deliver more than ${max} units for ${item.product}.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
     // Validate stock availability
     for (const item of items) {
       if (item.productId) {
@@ -122,18 +201,43 @@ export const DeliveryChallanForm = ({ existingId, sourceSupplierPoId }: Delivery
         }
       }
     }
-    saveDocument("delivery-challan", challanNo, date, customerName, 0, {
-      challanNo, date, challanType, invoiceRef, customerName, customerAddress,
-      customerState, customerGstin, customerPincode, shippingName, shippingAddress,
-      shippingState, shippingPincode, transporterName, vehicleNo, driverName,
-      driverPhone, ewayBillNo, items, remarks,
-    });
+    const saved = saveDocument(
+      "delivery-challan", challanNo, date, customerName, 0,
+      {
+        challanNo, date, challanType, invoiceRef, customerName, customerAddress,
+        customerState, customerGstin, customerPincode, shippingName, shippingAddress,
+        shippingState, shippingPincode, transporterName, vehicleNo, driverName,
+        driverPhone, ewayBillNo, items, remarks,
+      },
+      existingId,
+      sourceSupplierPoId ? { supplierPoId: sourceSupplierPoId, workflowStatus: "delivered" } : undefined,
+    );
+
+    if (sourceSupplierPoId && !existingId) {
+      updateDocumentWorkflowStatus(sourceSupplierPoId, "delivered");
+      const po = getDocument(sourceSupplierPoId);
+      saveLink({
+        stage: "delivery-challan",
+        documentId: saved.id,
+        documentNumber: saved.docNumber,
+        parentStage: "supplier-po",
+        parentId: sourceSupplierPoId,
+        parentNumber: po?.docNumber,
+        customerName,
+      });
+    }
     toast({ title: "Delivery Challan saved", description: `${challanNo} has been saved successfully.` });
     navigate("/sales/delivery-challans");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {sourceBanner && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+          <Info size={14} />
+          {sourceBanner}
+        </div>
+      )}
       {/* Header */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* From - Company Details */}
@@ -570,9 +674,20 @@ export const DeliveryChallanForm = ({ existingId, sourceSupplierPoId }: Delivery
           <Eye size={16} /> Preview & Download PDF
         </Button>
         <Button type="submit">
-          <FileText size={16} /> Generate Delivery Challan
+          <FileText size={16} /> {existingId ? "Update Delivery Challan" : "Generate Delivery Challan"}
         </Button>
       </div>
+
+      {existingId && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Transaction Trail</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WorkflowTrail documentId={existingId} currentStage="delivery-challan" />
+          </CardContent>
+        </Card>
+      )}
 
       <PDFDownloadWrapper
         filename={challanNo.replace(/\//g, "_")}

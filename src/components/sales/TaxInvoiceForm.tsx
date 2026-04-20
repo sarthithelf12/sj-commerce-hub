@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,16 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Eye } from "lucide-react";
+import { Plus, Trash2, FileText, Building2, Phone, Mail, MapPin, Eye, Info } from "lucide-react";
 import { numberToWords, formatCurrency } from "@/utils/numberToWords";
 import { COMPANY_INFO } from "@/config/companyInfo";
 import { PDFDownloadWrapper } from "@/components/shared/PDFDownloadWrapper";
 import { TaxInvoicePreview } from "@/components/sales/TaxInvoicePreview";
-import { saveDocument } from "@/utils/documentStorage";
+import { saveDocument, getDocument, updateDocumentWorkflowStatus } from "@/utils/documentStorage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ProductSelect } from "@/components/shared/ProductSelect";
 import { type Product } from "@/utils/productStorage";
+import { saveLink } from "@/utils/workflowStorage";
+import { WorkflowTrail } from "@/components/shared/WorkflowTrail";
 
 interface LineItem {
   id: string;
@@ -75,6 +77,69 @@ export const TaxInvoiceForm = ({ existingId, sourceDeliveryId }: TaxInvoiceFormP
   // Terms
   const [paymentTerms, setPaymentTerms] = useState("Payment On Bill Basis in Favor of SJMART PRIVATE LIMITED");
   const [showPreview, setShowPreview] = useState(false);
+  const [sourceBanner, setSourceBanner] = useState<string | null>(null);
+  const [deliveryMaxQty, setDeliveryMaxQty] = useState<Record<string, number>>({});
+
+  // Pre-fill from existing invoice (edit mode)
+  useEffect(() => {
+    if (!existingId) return;
+    const doc = getDocument(existingId);
+    if (!doc) return;
+    const d = doc.data as Record<string, unknown>;
+    setInvoiceNo((d.invoiceNo as string) || doc.docNumber);
+    setDate((d.date as string) || doc.date);
+    setPoNumber((d.poNumber as string) || "");
+    setPoDate((d.poDate as string) || "");
+    setCustomerName((d.customerName as string) || "");
+    setCustomerAddress((d.customerAddress as string) || "");
+    setCustomerState((d.customerState as string) || "");
+    setCustomerGstin((d.customerGstin as string) || "");
+    setCustomerPincode((d.customerPincode as string) || "");
+    setShippingName((d.shippingName as string) || "");
+    setShippingAddress((d.shippingAddress as string) || "");
+    setShippingState((d.shippingState as string) || "");
+    setShippingPincode((d.shippingPincode as string) || "");
+    if (Array.isArray(d.items) && d.items.length) setItems(d.items as LineItem[]);
+    if (d.paymentTerms) setPaymentTerms(d.paymentTerms as string);
+  }, [existingId]);
+
+  // Pre-fill from source Delivery Challan
+  useEffect(() => {
+    if (!sourceDeliveryId || existingId) return;
+    const dc = getDocument(sourceDeliveryId);
+    if (!dc) return;
+    const d = dc.data as Record<string, unknown>;
+    setCustomerName((d.customerName as string) || dc.partyName);
+    setCustomerAddress((d.customerAddress as string) || "");
+    setCustomerState((d.customerState as string) || "");
+    setCustomerGstin((d.customerGstin as string) || "");
+    setCustomerPincode((d.customerPincode as string) || "");
+    setShippingName((d.shippingName as string) || "");
+    setShippingAddress((d.shippingAddress as string) || "");
+    setShippingState((d.shippingState as string) || "");
+    setShippingPincode((d.shippingPincode as string) || "");
+    const dcItems = (Array.isArray(d.items) ? d.items : []) as Array<Record<string, unknown>>;
+    const maxQtyMap: Record<string, number> = {};
+    setItems(
+      dcItems.map((it, idx) => {
+        const productId = (it.productId as string) || "";
+        const qty = Number(it.quantity) || 1;
+        if (productId) maxQtyMap[productId] = qty;
+        return {
+          id: String(it.id || idx + 1),
+          productId,
+          product: (it.product as string) || "",
+          hsn: (it.hsn as string) || "",
+          specification: (it.specification as string) || "",
+          quantity: qty,
+          unitPrice: Number(it.unitPrice) || 0,
+          gstRate: Number(it.gstRate) || 18,
+        };
+      })
+    );
+    setDeliveryMaxQty(maxQtyMap);
+    setSourceBanner(`Pre-filled from Delivery Challan ${dc.docNumber}. Invoice quantity cannot exceed delivered quantity.`);
+  }, [sourceDeliveryId, existingId]);
 
   const addItem = () => {
     setItems([
@@ -137,17 +202,56 @@ export const TaxInvoiceForm = ({ existingId, sourceDeliveryId }: TaxInvoiceFormP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveDocument("tax-invoice", invoiceNo, date, customerName, calculations.grandTotal, {
-      invoiceNo, date, poNumber, poDate, customerName, customerAddress, customerState,
-      customerGstin, customerPincode, shippingName, shippingAddress, shippingState,
-      shippingPincode, items, calculations, isInterState, paymentTerms,
-    });
+    // Validate against delivered quantity (if linked)
+    if (sourceDeliveryId) {
+      for (const item of items) {
+        const max = item.productId ? deliveryMaxQty[item.productId] : undefined;
+        if (max !== undefined && item.quantity > max) {
+          toast({
+            title: "Quantity Error",
+            description: `Cannot invoice more than ${max} units for ${item.product} (delivered qty).`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
+    const saved = saveDocument(
+      "tax-invoice", invoiceNo, date, customerName, calculations.grandTotal,
+      {
+        invoiceNo, date, poNumber, poDate, customerName, customerAddress, customerState,
+        customerGstin, customerPincode, shippingName, shippingAddress, shippingState,
+        shippingPincode, items, calculations, isInterState, paymentTerms,
+      },
+      existingId,
+      sourceDeliveryId ? { deliveryId: sourceDeliveryId, workflowStatus: "raised" } : undefined,
+    );
+
+    if (sourceDeliveryId && !existingId) {
+      updateDocumentWorkflowStatus(sourceDeliveryId, "invoiced" as never);
+      const dc = getDocument(sourceDeliveryId);
+      saveLink({
+        stage: "tax-invoice",
+        documentId: saved.id,
+        documentNumber: saved.docNumber,
+        parentStage: "delivery-challan",
+        parentId: sourceDeliveryId,
+        parentNumber: dc?.docNumber,
+        customerName,
+      });
+    }
     toast({ title: "Tax Invoice saved", description: `${invoiceNo} has been saved successfully.` });
     navigate("/sales/tax-invoices");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {sourceBanner && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+          <Info size={14} />
+          {sourceBanner}
+        </div>
+      )}
       {/* Header */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* From - Company Details */}
@@ -598,9 +702,20 @@ export const TaxInvoiceForm = ({ existingId, sourceDeliveryId }: TaxInvoiceFormP
           <Eye size={16} /> Preview & Download PDF
         </Button>
         <Button type="submit">
-          <FileText size={16} /> Generate Tax Invoice
+          <FileText size={16} /> {existingId ? "Update Tax Invoice" : "Generate Tax Invoice"}
         </Button>
       </div>
+
+      {existingId && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Transaction Trail</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WorkflowTrail documentId={existingId} currentStage="tax-invoice" />
+          </CardContent>
+        </Card>
+      )}
 
       <PDFDownloadWrapper
         filename={invoiceNo.replace(/\//g, "_")}

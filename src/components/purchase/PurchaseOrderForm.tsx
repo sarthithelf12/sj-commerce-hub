@@ -192,18 +192,43 @@ export const PurchaseOrderForm = ({ existingId, sourceClientPoId }: PurchaseOrde
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveDocument("purchase-order", poNo, date, supplierName, calculations.grandTotal, {
-      poNo, date, supplierName, supplierAddress, supplierState, supplierGstin,
-      supplierPhone, supplierEmail, shippingAddress, shippingCity, shippingState,
-      shippingPincode, items, calculations, isInterState, deliveryTimeline,
-      deliveryTerms, paymentTerms, remarks,
-    });
+    const saved = saveDocument(
+      "purchase-order", poNo, date, supplierName, calculations.grandTotal,
+      {
+        poNo, date, supplierName, supplierAddress, supplierState, supplierGstin,
+        supplierPhone, supplierEmail, shippingAddress, shippingCity, shippingState,
+        shippingPincode, items, calculations, isInterState, deliveryTimeline,
+        deliveryTerms, paymentTerms, remarks,
+      },
+      existingId,
+      sourceClientPoId ? { clientPoId: sourceClientPoId, clientPoRef, workflowStatus: "ordered" } : (clientPoRef ? { clientPoRef } : undefined),
+    );
+
+    if (sourceClientPoId && !existingId) {
+      attachSupplierPoToClientPo(sourceClientPoId, saved.id);
+      const cpo = getClientPO(sourceClientPoId);
+      saveLink({
+        stage: "supplier-po",
+        documentId: saved.id,
+        documentNumber: saved.docNumber,
+        parentStage: "client-po",
+        parentId: sourceClientPoId,
+        parentNumber: cpo?.internalRef,
+        customerName: cpo?.customerName,
+      });
+    }
     toast({ title: "Purchase Order saved", description: `${poNo} has been saved successfully.` });
     navigate("/purchases");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {sourceBanner && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+          <Info size={14} />
+          {sourceBanner}
+        </div>
+      )}
       {/* Header Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Invoice To - Company Details */}
@@ -637,9 +662,20 @@ export const PurchaseOrderForm = ({ existingId, sourceClientPoId }: PurchaseOrde
           <Eye size={16} /> Preview & Download PDF
         </Button>
         <Button type="submit">
-          Generate Purchase Order
+          {existingId ? "Update Purchase Order" : "Generate Purchase Order"}
         </Button>
       </div>
+
+      {existingId && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Transaction Trail</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WorkflowTrail documentId={existingId} currentStage="supplier-po" />
+          </CardContent>
+        </Card>
+      )}
 
       <PDFDownloadWrapper
         filename={poNo.replace(/\//g, "_")}
