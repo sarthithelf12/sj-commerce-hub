@@ -337,10 +337,11 @@ const Transport = () => {
             <div className="space-y-1">
               <Label>Linked DC / PO Number</Label>
               <Select
-                value={form.linkedDoc}
+                value={form.linkedDoc || "__none__"}
                 onValueChange={v => {
-                  const dc = deliveryChallans.find(d => d.docNumber === v);
-                  set("linkedDoc", v);
+                  const val = v === "__none__" ? "" : v;
+                  const dc = deliveryChallans.find(d => d.docNumber === val);
+                  set("linkedDoc", val);
                   set("linkedDocId", dc?.id || "");
                   if (dc) {
                     const data = dc.data as Record<string, unknown>;
@@ -350,7 +351,7 @@ const Transport = () => {
               >
                 <SelectTrigger><SelectValue placeholder="Select or type manually" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">— None —</SelectItem>
+                  <SelectItem value="__none__">— None —</SelectItem>
                   {deliveryChallans.map(dc => (
                     <SelectItem key={dc.id} value={dc.docNumber}>{dc.docNumber} — {dc.partyName}</SelectItem>
                   ))}
